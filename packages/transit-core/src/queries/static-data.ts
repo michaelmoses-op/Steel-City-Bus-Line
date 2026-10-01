@@ -31,6 +31,18 @@ export type NearbyStop = {
   distanceM: number;
 };
 
+export type StopDetail = {
+  stopId: string;
+  stopName: string;
+  lat: number;
+  lon: number;
+  routes: {
+    routeId: string;
+    routeShortName: string | null;
+    routeLongName: string | null;
+  }[];
+};
+
 export async function listRoutes(db: Db): Promise<RouteSummary[]> {
   const rows = await db
     .select({
@@ -97,6 +109,34 @@ export async function getRouteDetail(routeId: string, db: Db): Promise<RouteDeta
     routeTextColor: route.routeTextColor,
     stops: stopsOnRoute,
     shape,
+  };
+}
+
+export async function getStopDetail(stopId: string, db: Db): Promise<StopDetail | null> {
+  const stopRows = await db.select().from(stops).where(eq(stops.stopId, stopId)).limit(1);
+  const stop = stopRows[0];
+  if (!stop) {
+    return null;
+  }
+
+  const routeRows = await db
+    .selectDistinct({
+      routeId: routes.routeId,
+      routeShortName: routes.routeShortName,
+      routeLongName: routes.routeLongName,
+    })
+    .from(stopTimes)
+    .innerJoin(trips, eq(stopTimes.tripId, trips.tripId))
+    .innerJoin(routes, eq(trips.routeId, routes.routeId))
+    .where(eq(stopTimes.stopId, stopId))
+    .orderBy(asc(routes.routeShortName));
+
+  return {
+    stopId: stop.stopId,
+    stopName: stop.stopName,
+    lat: stop.lat,
+    lon: stop.lon,
+    routes: routeRows,
   };
 }
 

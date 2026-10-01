@@ -1,12 +1,18 @@
 import {
+  alertsResponseSchema,
   healthResponseSchema,
+  nearbyStopsResponseSchema,
   routeDetailSchema,
   routesListResponseSchema,
-  nearbyStopsResponseSchema,
+  stopDetailSchema,
+  vehiclesResponseSchema,
   type HealthResponse,
+  type LiveVehicle,
+  type NearbyStop,
   type RouteDetail,
   type RouteSummary,
-  type NearbyStop,
+  type ServiceAlert,
+  type StopDetail,
 } from "@steel-city/shared";
 
 export type ApiClientOptions = {
@@ -51,6 +57,48 @@ export function createApiClient(options: ApiClientOptions) {
       return getJson(`/api/v1/stops/nearby?${params}`, nearbyStopsResponseSchema).then(
         (r) => r.stops,
       );
+    },
+
+    getStop(stopId: string): Promise<StopDetail> {
+      return getJson(`/api/v1/stops/${encodeURIComponent(stopId)}`, stopDetailSchema);
+    },
+
+    getVehicles(routeId?: string): Promise<{ vehicles: LiveVehicle[]; fetchedAt: string | null }> {
+      const q = routeId ? `?routeId=${encodeURIComponent(routeId)}` : "";
+      return getJson(`/api/v1/vehicles${q}`, vehiclesResponseSchema);
+    },
+
+    getAlerts(): Promise<{ alerts: ServiceAlert[]; fetchedAt: string | null }> {
+      return getJson("/api/v1/alerts", alertsResponseSchema);
+    },
+
+    subscribeVehicles(
+      onUpdate: (payload: { vehicles: LiveVehicle[]; fetchedAt: string | null }) => void,
+      options?: { routeId?: string; onError?: (err: Error) => void },
+    ): () => void {
+      const params = new URLSearchParams();
+      if (options?.routeId) params.set("routeId", options.routeId);
+      const q = params.toString();
+      const url = `${base}/api/v1/vehicles/stream${q ? `?${q}` : ""}`;
+      const es = new EventSource(url);
+
+      es.addEventListener("vehicles", (ev) => {
+        try {
+          const data = JSON.parse((ev as MessageEvent).data) as {
+            vehicles: LiveVehicle[];
+            fetchedAt: string | null;
+          };
+          onUpdate(data);
+        } catch (err) {
+          options?.onError?.(err instanceof Error ? err : new Error(String(err)));
+        }
+      });
+
+      es.onerror = () => {
+        options?.onError?.(new Error("Vehicle stream disconnected"));
+      };
+
+      return () => es.close();
     },
   };
 }

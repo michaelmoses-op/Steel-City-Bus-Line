@@ -6,6 +6,7 @@ export const healthResponseSchema = z.object({
   version: z.string(),
   service: z.string().optional(),
   database: z.boolean().optional(),
+  redis: z.boolean().optional(),
 });
 
 export type HealthResponse = z.infer<typeof healthResponseSchema>;

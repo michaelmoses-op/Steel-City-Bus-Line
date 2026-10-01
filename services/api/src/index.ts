@@ -2,12 +2,13 @@ import "./load-env.js";
 
 import { serve } from "@hono/node-server";
 import { createDb, type Db } from "@steel-city/db";
-import { TRANSIT_CORE_VERSION } from "@steel-city/transit-core";
+import { getRedis, TRANSIT_CORE_VERSION, type RedisLike } from "@steel-city/transit-core";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createV1Routes } from "./routes/v1.js";
 
 let db: Db | null = null;
+let redis: RedisLike | null = null;
 
 try {
   const url = process.env.DATABASE_URL;
@@ -20,6 +21,19 @@ try {
 } catch (err) {
   console.error("[api] database connection failed", err);
   db = null;
+}
+
+if (process.env.REDIS_URL) {
+  getRedis()
+    .then((client) => {
+      redis = client;
+      console.log("[api] redis connected");
+    })
+    .catch((err) => {
+      console.error("[api] redis connection failed", err);
+    });
+} else {
+  console.warn("[api] REDIS_URL not set — live vehicles unavailable");
 }
 
 const app = new Hono();
@@ -37,6 +51,7 @@ app.get("/health", (c) =>
     service: "api",
     transitCore: TRANSIT_CORE_VERSION,
     database: db !== null,
+    redis: redis !== null,
   }),
 );
 
@@ -46,10 +61,17 @@ app.get("/api/v1/health", (c) =>
     version: "v1",
     service: "api",
     database: db !== null,
+    redis: redis !== null,
   }),
 );
 
-app.route("/api/v1", createV1Routes(() => db));
+app.route(
+  "/api/v1",
+  createV1Routes({
+    getDatabase: () => db,
+    getRedis: () => redis,
+  }),
+);
 
 const port = Number(process.env.PORT ?? 4000);
 
