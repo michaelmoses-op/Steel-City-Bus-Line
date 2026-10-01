@@ -53,17 +53,17 @@ Use `[x]` when done, `[ ]` when not started, `[~]` when in progress.
 
 ### Phase 3 — Realtime GTFS-RT
 
-- [ ] Decode bus vehicle + trip update feeds
-- [ ] Redis snapshot writer + TTL
-- [ ] API: `GET /vehicles`, SSE `GET /vehicles/stream`
-- [ ] `transit-core` staleness / missing vehicle rules
+- [x] Decode bus vehicle + trip update feeds
+- [x] Redis snapshot writer + TTL
+- [x] API: `GET /vehicles`, SSE `GET /vehicles/stream`
+- [x] `transit-core` staleness / missing vehicle rules
 
 ### Phase 4 — Web UX
 
-- [ ] Map page (MapLibre or Mapbox)
-- [ ] Route list + detail
-- [ ] Stop board / nearby stops
-- [ ] Alerts surface
+- [x] Map page (MapLibre or Mapbox)
+- [x] Route list + detail
+- [x] Stop board / nearby stops
+- [x] Alerts surface
 
 ### Phase 5 — Mobile (Expo)
 
@@ -75,9 +75,9 @@ Use `[x]` when done, `[ ]` when not started, `[~]` when in progress.
 
 ## Current focus
 
-**Phase:** 3 (Realtime GTFS-RT)
+**Phase:** 5 (Mobile — **STOP** until user tests web)
 
-**Active goal:** Decode PRT GTFS-RT feeds, Redis snapshots, `GET /vehicles` + SSE stream.
+**Active goal:** User testing web app on desktop. Do not start Expo until Michael confirms.
 
 **Blockers:** None documented.
 
@@ -91,6 +91,7 @@ Append a short entry after each meaningful agent session (newest first).
 
 | Date | Author | Summary |
 |------|--------|---------|
+| 2026-10-01 | — | Phase 3–4: GTFS-RT/Redis, live API, MapLibre web (map, routes, stops, alerts) |
 | 2026-10-01 | — | Phase 2: PostGIS docker, Drizzle schema, GTFS import, routes/stops API + client |
 | 2026-10-01 | — | Phase 0–1: pnpm monorepo, Hono API, worker stub, Next health page, mobile README stub |
 | 2026-10-01 | — | Added ARCHITECTURE.md, AGENTS.md; stack Option 1 defined; no code scaffold yet |

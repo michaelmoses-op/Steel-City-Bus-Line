@@ -26,11 +26,11 @@ pnpm install
 pnpm build:packages   # first time; turbo dev also builds deps via ^build
 
 # Database + PRT static schedule (Phase 2)
-pnpm db:up
+pnpm db:up            # Postgres + Redis
 pnpm db:migrate
 pnpm gtfs:import      # downloads PRT GTFS.zip into Postgres (~1–2 min)
 
-pnpm dev
+pnpm dev              # web, API, worker (GTFS-RT poll → Redis)
 ```
 
 | Service | URL |
@@ -60,4 +60,4 @@ Next.js · Hono (Node) · PostgreSQL/PostGIS · Redis · Expo (mobile, later) ·
 
 ## Status
 
-Phase 2 static GTFS complete. Next: Phase 3 realtime GTFS-RT — see [AGENTS.md](./AGENTS.md).
+**Web app (Phase 4) is feature-complete for v1 testing** — live map, routes, stops, alerts. Mobile (Expo) not started. See [AGENTS.md](./AGENTS.md).

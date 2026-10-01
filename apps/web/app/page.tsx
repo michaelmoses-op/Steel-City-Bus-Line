@@ -1,69 +1,96 @@
-import { createApiClient } from "@steel-city/api-client";
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+import Link from "next/link";
+import { api } from "@/lib/api";
 
 export default async function Home() {
-  const client = createApiClient({ baseUrl: apiBaseUrl });
-
-  let health: Awaited<ReturnType<typeof client.getHealth>> | null = null;
-  let routes: Awaited<ReturnType<typeof client.getRoutes>> | null = null;
+  let health: Awaited<ReturnType<typeof api.getHealth>> | null = null;
+  let routeCount: number | null = null;
+  let vehicleCount: number | null = null;
+  let alertCount: number | null = null;
   let error: string | null = null;
 
   try {
-    health = await client.getHealth();
+    health = await api.getHealth();
     if (health.database) {
-      routes = await client.getRoutes();
+      const routes = await api.getRoutes();
+      routeCount = routes.length;
+    }
+    if (health.redis) {
+      const { vehicles } = await api.getVehicles();
+      vehicleCount = vehicles.length;
+      const { alerts } = await api.getAlerts();
+      alertCount = alerts.length;
     }
   } catch (e) {
-    error = e instanceof Error ? e.message : "Could not reach API";
+    error = e instanceof Error ? e.message : "API unreachable";
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <main className="mx-auto flex max-w-lg flex-col gap-8 px-6 py-16">
-        <header>
-          <p className="text-sm font-medium uppercase tracking-wider text-amber-400">
-            Steel City Bus Line
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            Pittsburgh transit, done better
-          </h1>
-          <p className="mt-3 text-zinc-400">
-            Phase 2 — static GTFS in Postgres. Run{" "}
-            <code className="rounded bg-zinc-800 px-1 py-0.5">pnpm db:up</code>, migrate, and{" "}
-            <code className="rounded bg-zinc-800 px-1 py-0.5">pnpm gtfs:import</code> to load
-            routes.
-          </p>
-        </header>
+    <div className="space-y-8">
+      <header>
+        <h1 className="text-3xl font-semibold tracking-tight">Pittsburgh transit, clearer</h1>
+        <p className="mt-2 max-w-2xl text-zinc-400">
+          Live buses, routes, stops, and service alerts for the Port Authority service area.
+          Data from PRT GTFS and GTFS-Realtime, with stale vehicles filtered on the server.
+        </p>
+      </header>
 
-        <section className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-          <h2 className="text-lg font-medium">API health</h2>
-          {health ? (
-            <pre className="mt-4 overflow-x-auto rounded-lg bg-zinc-950 p-4 text-sm text-emerald-400">
-              {JSON.stringify(health, null, 2)}
-            </pre>
-          ) : (
-            <p className="mt-4 text-sm text-red-400">{error ?? "Unknown error"}</p>
-          )}
-        </section>
+      {error && (
+        <p className="rounded-lg border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-300">
+          {error}. Start the stack with <code className="text-red-200">pnpm dev</code> and ensure
+          Docker (Postgres + Redis) is running.
+        </p>
+      )}
 
-        {routes && (
-          <section className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
-            <h2 className="text-lg font-medium">Routes loaded</h2>
-            <p className="mt-2 text-3xl font-semibold text-amber-400">{routes.length}</p>
-            <ul className="mt-4 max-h-48 space-y-1 overflow-y-auto text-sm text-zinc-400">
-              {routes.slice(0, 12).map((r) => (
-                <li key={r.routeId}>
-                  {r.routeShortName ?? r.routeId} — {r.routeLongName ?? "—"}
-                </li>
-              ))}
-            </ul>
-            {routes.length > 12 && (
-              <p className="mt-2 text-xs text-zinc-600">Showing 12 of {routes.length}</p>
-            )}
-          </section>
-        )}
-      </main>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard label="Routes" value={routeCount} href="/routes" />
+        <StatCard label="Live buses" value={vehicleCount} href="/map" />
+        <StatCard label="Active alerts" value={alertCount} href="/alerts" />
+      </div>
+
+      {health && (
+        <pre className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 text-xs text-zinc-500">
+          {JSON.stringify(health, null, 2)}
+        </pre>
+      )}
+
+      <div className="flex flex-wrap gap-3">
+        <PrimaryLink href="/map">Open live map</PrimaryLink>
+        <PrimaryLink href="/routes">Browse routes</PrimaryLink>
+        <PrimaryLink href="/stops">Find stops</PrimaryLink>
+      </div>
     </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: number | null;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 transition hover:border-amber-500/40"
+    >
+      <p className="text-sm text-zinc-500">{label}</p>
+      <p className="mt-1 text-3xl font-semibold text-amber-400">
+        {value === null ? "—" : value}
+      </p>
+    </Link>
+  );
+}
+
+function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-amber-400"
+    >
+      {children}
+    </Link>
   );
 }
