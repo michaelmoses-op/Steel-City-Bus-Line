@@ -1,3 +1,5 @@
+import "./load-env.js";
+
 import { TRANSIT_CORE_VERSION } from "@steel-city/transit-core";
 
 const intervalMs = Number(process.env.WORKER_POLL_INTERVAL_MS ?? 30_000);

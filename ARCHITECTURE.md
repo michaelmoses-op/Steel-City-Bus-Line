@@ -164,6 +164,7 @@ Steel-City-Bus-Line/
 │   ├── api/                 # Hono HTTP + SSE
 │   └── worker/              # GTFS-RT poll + GTFS import (optional split from api)
 ├── packages/
+│   ├── db/                  # Drizzle schema, migrations, Postgres client
 │   ├── transit-core/        # Domain: GTFS, merge static+RT, business rules
 │   ├── api-client/          # Typed fetch + SSE for web and mobile
 │   └── shared/              # Zod schemas, types, constants

@@ -47,9 +47,9 @@ Use `[x]` when done, `[ ]` when not started, `[~]` when in progress.
 
 ### Phase 2 — Static GTFS
 
-- [ ] Download/import script for PRT GTFS.zip
-- [ ] Postgres + PostGIS schema (routes, stops, trips, shapes)
-- [ ] API: `GET /routes`, `GET /routes/:id`, `GET /stops/nearby`
+- [x] Download/import script for PRT GTFS.zip
+- [x] Postgres + PostGIS schema (routes, stops, trips, shapes)
+- [x] API: `GET /routes`, `GET /routes/:id`, `GET /stops/nearby`
 
 ### Phase 3 — Realtime GTFS-RT
 
@@ -75,9 +75,9 @@ Use `[x]` when done, `[ ]` when not started, `[~]` when in progress.
 
 ## Current focus
 
-**Phase:** 2 (Static GTFS)
+**Phase:** 3 (Realtime GTFS-RT)
 
-**Active goal:** GTFS import script, Postgres/PostGIS schema, first route/stop API endpoints.
+**Active goal:** Decode PRT GTFS-RT feeds, Redis snapshots, `GET /vehicles` + SSE stream.
 
 **Blockers:** None documented.
 
@@ -91,6 +91,7 @@ Append a short entry after each meaningful agent session (newest first).
 
 | Date | Author | Summary |
 |------|--------|---------|
+| 2026-10-01 | — | Phase 2: PostGIS docker, Drizzle schema, GTFS import, routes/stops API + client |
 | 2026-10-01 | — | Phase 0–1: pnpm monorepo, Hono API, worker stub, Next health page, mobile README stub |
 | 2026-10-01 | — | Added ARCHITECTURE.md, AGENTS.md; stack Option 1 defined; no code scaffold yet |
 
@@ -112,6 +113,7 @@ Append a short entry after each meaningful agent session (newest first).
 | `apps/mobile` | Expo; same API client; native maps |
 | `services/api` | Hono routes, SSE, CORS |
 | `services/worker` | GTFS import + GTFS-RT polling → Redis/Postgres |
+| `packages/db` | Drizzle schema, Postgres client, SQL migrations |
 | `packages/transit-core` | No HTTP; pure domain + GTFS/RT logic |
 | `packages/api-client` | Shared client for web + mobile |
 | `packages/shared` | Zod schemas, shared types |
@@ -142,6 +144,9 @@ Document in `.env.example` when scaffold exists. Expected names:
 ```bash
 pnpm install
 pnpm build:packages   # optional first run; turbo dev runs ^build on deps
+pnpm db:up            # Docker PostGIS
+pnpm db:migrate
+pnpm gtfs:import      # PRT GTFS.zip → Postgres
 pnpm dev              # web :3000, api :4000, worker stub logs
 
 pnpm lint

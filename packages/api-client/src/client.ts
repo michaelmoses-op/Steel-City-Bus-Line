@@ -1,4 +1,13 @@
-import { healthResponseSchema, type HealthResponse } from "@steel-city/shared";
+import {
+  healthResponseSchema,
+  routeDetailSchema,
+  routesListResponseSchema,
+  nearbyStopsResponseSchema,
+  type HealthResponse,
+  type RouteDetail,
+  type RouteSummary,
+  type NearbyStop,
+} from "@steel-city/shared";
 
 export type ApiClientOptions = {
   baseUrl: string;
@@ -23,6 +32,25 @@ export function createApiClient(options: ApiClientOptions) {
   return {
     getHealth(): Promise<HealthResponse> {
       return getJson("/api/v1/health", healthResponseSchema);
+    },
+
+    getRoutes(): Promise<RouteSummary[]> {
+      return getJson("/api/v1/routes", routesListResponseSchema).then((r) => r.routes);
+    },
+
+    getRoute(routeId: string): Promise<RouteDetail> {
+      return getJson(`/api/v1/routes/${encodeURIComponent(routeId)}`, routeDetailSchema);
+    },
+
+    getNearbyStops(lat: number, lon: number, radiusM = 500): Promise<NearbyStop[]> {
+      const params = new URLSearchParams({
+        lat: String(lat),
+        lon: String(lon),
+        radius: String(radiusM),
+      });
+      return getJson(`/api/v1/stops/nearby?${params}`, nearbyStopsResponseSchema).then(
+        (r) => r.stops,
+      );
     },
   };
 }

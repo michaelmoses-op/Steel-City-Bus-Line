@@ -24,6 +24,12 @@ cp .env.example .env
 
 pnpm install
 pnpm build:packages   # first time; turbo dev also builds deps via ^build
+
+# Database + PRT static schedule (Phase 2)
+pnpm db:up
+pnpm db:migrate
+pnpm gtfs:import      # downloads PRT GTFS.zip into Postgres (~1–2 min)
+
 pnpm dev
 ```
 
@@ -42,6 +48,9 @@ The home page calls the API via `@steel-city/api-client` and shows JSON when the
 | `pnpm dev` | Web + API + worker + package watch (excludes mobile stub) |
 | `pnpm build` | Production builds |
 | `pnpm build:packages` | Build `packages/*` only |
+| `pnpm db:up` / `db:down` | Start/stop PostGIS via Docker |
+| `pnpm db:migrate` | Apply SQL migrations |
+| `pnpm gtfs:import` | Download & import PRT GTFS |
 | `pnpm typecheck` | TypeScript across workspace |
 | `pnpm lint` | Lint where configured |
 
@@ -51,4 +60,4 @@ Next.js · Hono (Node) · PostgreSQL/PostGIS · Redis · Expo (mobile, later) ·
 
 ## Status
 
-Phase 1 monorepo scaffold complete. Next: Phase 2 static GTFS — see [AGENTS.md](./AGENTS.md).
+Phase 2 static GTFS complete. Next: Phase 3 realtime GTFS-RT — see [AGENTS.md](./AGENTS.md).

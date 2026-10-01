@@ -5,14 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "import:gtfs": "tsx src/import-gtfs.ts",
     "start": "node dist/index.js",
     "build": "tsc",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@steel-city/transit-core": "workspace:*"
+    "@steel-city/db": "workspace:*",
+    "@steel-city/transit-core": "workspace:*",
+    "adm-zip": "^0.5.16",
+    "dotenv": "^16.5.0"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
     "@types/node": "^22.15.32",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"

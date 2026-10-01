@@ -5,6 +5,7 @@ export const healthResponseSchema = z.object({
   ok: z.literal(true),
   version: z.string(),
   service: z.string().optional(),
+  database: z.boolean().optional(),
 });
 
 export type HealthResponse = z.infer<typeof healthResponseSchema>;
