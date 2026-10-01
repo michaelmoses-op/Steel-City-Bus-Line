@@ -1,0 +1,19 @@
+{
+  "name": "steel-city-bus-line",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev --filter=!@steel-city/mobile",
+    "build:packages": "turbo run build --filter=./packages/*",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22"
+  }
+}
