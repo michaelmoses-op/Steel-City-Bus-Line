@@ -2,13 +2,26 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema.js";
 
-export type Db = ReturnType<typeof createDb>;
+export type Db = ReturnType<typeof drizzle<typeof schema>>;
 
-let cached: Db | null = null;
+export type DbConnection = {
+  db: Db;
+  close: () => Promise<void>;
+};
 
-export function createDb(connectionString: string) {
+let cached: DbConnection | null = null;
+
+export function createDbConnection(connectionString: string): DbConnection {
   const client = postgres(connectionString, { max: 10 });
-  return drizzle(client, { schema });
+  return {
+    db: drizzle(client, { schema }),
+    close: () => client.end({ timeout: 10 }),
+  };
+}
+
+/** @deprecated Prefer createDbConnection in scripts that must exit (e.g. gtfs import). */
+export function createDb(connectionString: string): Db {
+  return createDbConnection(connectionString).db;
 }
 
 export function getDb(): Db {
@@ -17,11 +30,14 @@ export function getDb(): Db {
     throw new Error("DATABASE_URL is not set");
   }
   if (!cached) {
-    cached = createDb(url);
+    cached = createDbConnection(url);
   }
-  return cached;
+  return cached.db;
 }
 
 export async function closeDb(): Promise<void> {
-  cached = null;
+  if (cached) {
+    await cached.close();
+    cached = null;
+  }
 }

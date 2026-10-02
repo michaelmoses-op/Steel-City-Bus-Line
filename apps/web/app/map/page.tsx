@@ -9,13 +9,14 @@ export default function MapPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold">Live map</h1>
-      <p className="mt-1 text-sm text-zinc-500">
-        Vehicle positions refresh over SSE. Stale GPS (&gt;2 min) is dropped server-side.
+      <div className="pgh-checkered mb-4 h-1.5 w-24 rounded-sm" aria-hidden />
+      <h1 className="text-2xl font-bold text-zinc-50">Live map</h1>
+      <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+        Positions refresh over SSE. Stale GPS (&gt;2 min) is removed server-side.
         {route && (
           <>
             {" "}
-            Filtering route <strong className="text-amber-400">{route}</strong>.
+            Showing route <strong className="text-[#FFB612]">{route}</strong> only.
           </>
         )}
       </p>

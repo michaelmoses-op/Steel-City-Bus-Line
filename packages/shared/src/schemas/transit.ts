@@ -15,9 +15,13 @@ export const stopOnRouteSchema = z.object({
   lat: z.number(),
   lon: z.number(),
   stopSequence: z.number().int(),
+  arrivalTime: z.string().nullable(),
+  departureTime: z.string().nullable(),
 });
 
 export const routeDetailSchema = routeSummarySchema.extend({
+  tripHeadsign: z.string().nullable(),
+  scheduleNote: z.string(),
   stops: z.array(stopOnRouteSchema),
   shape: z.array(z.object({ lat: z.number(), lon: z.number() })).nullable(),
 });

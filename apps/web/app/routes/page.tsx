@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { api } from "@/lib/api";
+import { getApi } from "@/lib/api";
 
 export default function RoutesPage() {
   const [q, setQ] = useState("");
   const { data, isLoading, error } = useQuery({
     queryKey: ["routes"],
-    queryFn: () => api.getRoutes(),
+    queryFn: () => getApi().getRoutes(),
   });
 
   const filtered = useMemo(() => {

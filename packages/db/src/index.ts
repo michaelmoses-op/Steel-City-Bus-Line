@@ -1,2 +1,9 @@
-export { closeDb, createDb, getDb, type Db } from "./client.js";
+export {
+  closeDb,
+  createDb,
+  createDbConnection,
+  getDb,
+  type Db,
+  type DbConnection,
+} from "./client.js";
 export * from "./schema.js";

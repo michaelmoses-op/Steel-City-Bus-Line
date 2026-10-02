@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { RouteDetailView } from "@/components/route-detail-view";
-import { api } from "@/lib/api";
+import { getApi } from "@/lib/api";
 
 type Props = { params: Promise<{ routeId: string }> };
 
@@ -9,7 +9,7 @@ export default async function RouteDetailPage({ params }: Props) {
 
   let route;
   try {
-    route = await api.getRoute(routeId);
+    route = await getApi().getRoute(routeId);
   } catch {
     notFound();
   }

@@ -5,6 +5,7 @@ import { createDb, type Db } from "@steel-city/db";
 import { getRedis, TRANSIT_CORE_VERSION, type RedisLike } from "@steel-city/transit-core";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { resolveCorsOrigin } from "./cors.js";
 import { createV1Routes } from "./routes/v1.js";
 
 let db: Db | null = null;
@@ -41,7 +42,7 @@ const app = new Hono();
 app.use(
   "/*",
   cors({
-    origin: process.env.CORS_ORIGIN ?? "http://localhost:3000",
+    origin: (origin) => resolveCorsOrigin(origin),
   }),
 );
 

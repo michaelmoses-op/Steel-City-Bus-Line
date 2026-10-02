@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { getApi } from "@/lib/api";
 
 export default function AlertsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["alerts"],
-    queryFn: () => api.getAlerts(),
+    queryFn: () => getApi().getAlerts(),
     refetchInterval: 60_000,
   });
 

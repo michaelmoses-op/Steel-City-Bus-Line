@@ -16,9 +16,13 @@ export type StopOnRoute = {
   lat: number;
   lon: number;
   stopSequence: number;
+  arrivalTime: string | null;
+  departureTime: string | null;
 };
 
 export type RouteDetail = RouteSummary & {
+  tripHeadsign: string | null;
+  scheduleNote: string;
   stops: StopOnRoute[];
   shape: { lat: number; lon: number }[] | null;
 };
@@ -67,7 +71,11 @@ export async function getRouteDetail(routeId: string, db: Db): Promise<RouteDeta
   }
 
   const tripRows = await db
-    .select({ tripId: trips.tripId, shapeId: trips.shapeId })
+    .select({
+      tripId: trips.tripId,
+      shapeId: trips.shapeId,
+      tripHeadsign: trips.tripHeadsign,
+    })
     .from(trips)
     .where(eq(trips.routeId, routeId))
     .limit(1);
@@ -83,6 +91,8 @@ export async function getRouteDetail(routeId: string, db: Db): Promise<RouteDeta
         lat: stops.lat,
         lon: stops.lon,
         stopSequence: stopTimes.stopSequence,
+        arrivalTime: stopTimes.arrivalTime,
+        departureTime: stopTimes.departureTime,
       })
       .from(stopTimes)
       .innerJoin(stops, eq(stopTimes.stopId, stops.stopId))
@@ -107,6 +117,9 @@ export async function getRouteDetail(routeId: string, db: Db): Promise<RouteDeta
     routeType: route.routeType,
     routeColor: route.routeColor,
     routeTextColor: route.routeTextColor,
+    tripHeadsign: trip?.tripHeadsign ?? null,
+    scheduleNote:
+      "Scheduled times from one representative trip in the current GTFS bundle. Live arrivals may differ.",
     stops: stopsOnRoute,
     shape,
   };

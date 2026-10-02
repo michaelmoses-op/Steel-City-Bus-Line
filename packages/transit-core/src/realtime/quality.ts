@@ -1,8 +1,8 @@
 import type { LiveVehicle } from "./types.js";
 
-/** Drop stale vehicles from the default map/API list; keep in raw ingest for debugging if needed. */
+/** Vehicles shown on the map/API: fresh GPS and an assigned route. */
 export function filterDisplayVehicles(vehicles: LiveVehicle[]): LiveVehicle[] {
-  return vehicles.filter((v) => !v.stale);
+  return vehicles.filter((v) => !v.stale && v.routeId !== null && v.routeId !== "");
 }
 
 export function countStale(vehicles: LiveVehicle[]): number {

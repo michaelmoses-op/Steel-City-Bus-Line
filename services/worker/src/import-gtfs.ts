@@ -1,7 +1,7 @@
 import "./load-env.js";
 
 import AdmZip from "adm-zip";
-import { createDb } from "@steel-city/db";
+import { createDbConnection } from "@steel-city/db";
 import { importGtfsTables, parseGtfsCsv, type GtfsStaticTables } from "@steel-city/transit-core";
 
 function readGtfsFromZip(buffer: Buffer): GtfsStaticTables {
@@ -49,6 +49,7 @@ async function main(): Promise<void> {
   const buffer = Buffer.from(await response.arrayBuffer());
   console.log(`[import-gtfs] downloaded ${(buffer.length / 1024 / 1024).toFixed(2)} MiB`);
 
+  console.log("[import-gtfs] parsing zip (large feeds can take a minute)…");
   const tables = readGtfsFromZip(buffer);
   console.log(`[import-gtfs] routes: ${tables.routes.length} rows`);
   console.log(`[import-gtfs] stops: ${tables.stops.length} rows`);
@@ -56,13 +57,21 @@ async function main(): Promise<void> {
   console.log(`[import-gtfs] stop_times: ${tables.stopTimes.length} rows`);
   console.log(`[import-gtfs] shapes: ${tables.shapes.length} rows`);
 
-  const db = createDb(databaseUrl);
-  console.log("[import-gtfs] importing into postgres…");
-  const result = await importGtfsTables(db, tables);
-  console.log("[import-gtfs] done", result);
+  const connection = createDbConnection(databaseUrl);
+  try {
+    console.log("[import-gtfs] importing into postgres (often 5–15 min, progress below)…");
+    const result = await importGtfsTables(connection.db, tables);
+    console.log("[import-gtfs] done", result);
+  } finally {
+    await connection.close();
+  }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
