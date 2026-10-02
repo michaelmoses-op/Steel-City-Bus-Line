@@ -4,6 +4,7 @@ import type { RouteDetail } from "@steel-city/shared";
 import Link from "next/link";
 import { formatGtfsTime } from "@/lib/format-gtfs-time";
 import { LiveMap } from "./live-map";
+import { RouteAlertsPanel } from "./route-alerts-panel";
 import { RouteShapeMap } from "./route-shape-map";
 
 export function RouteDetailView({ route }: { route: RouteDetail }) {
@@ -11,6 +12,8 @@ export function RouteDetailView({ route }: { route: RouteDetail }) {
 
   return (
     <div className="space-y-8">
+      <RouteAlertsPanel routeId={route.routeId} />
+
       <header className="pgh-steel-panel overflow-hidden rounded-2xl">
         <div className="pgh-checkered h-1.5" aria-hidden />
         <div className="p-6">

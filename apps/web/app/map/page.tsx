@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { LiveMap } from "@/components/live-map";
+import { RouteAlertsPanel } from "@/components/route-alerts-panel";
 
 export default function MapPage() {
   const searchParams = useSearchParams();
@@ -20,6 +21,8 @@ export default function MapPage() {
           </>
         )}
       </p>
+      {route && <RouteAlertsPanel routeId={route} className="mt-4" />}
+
       <div className="mt-6">
         <LiveMap routeId={route} />
       </div>

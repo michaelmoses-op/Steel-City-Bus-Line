@@ -54,16 +54,28 @@ Use `[x]` when done, `[ ]` when not started, `[~]` when in progress.
 ### Phase 3 — Realtime GTFS-RT
 
 - [x] Decode bus vehicle + trip update feeds
-- [x] Redis snapshot writer + TTL
+- [x] Redis snapshot writer + TTL (vehicles, alerts, trip predictions)
 - [x] API: `GET /vehicles`, SSE `GET /vehicles/stream`
+- [x] API: `GET /stops/:id/arrivals` (trip-update predictions)
 - [x] `transit-core` staleness / missing vehicle rules
 
 ### Phase 4 — Web UX
 
 - [x] Map page (MapLibre or Mapbox)
-- [x] Route list + detail
-- [x] Stop board / nearby stops
-- [x] Alerts surface
+- [x] Route list + detail (static timetable sample, live map per route)
+- [x] Stop board / nearby stops + **live arrivals** on stop detail
+- [x] Alerts surface + **route-scoped alerts** on route detail / filtered map
+- [x] Pittsburgh UI (nav, steel panels, checkered bands)
+- [x] Routes page: **Live now** section + green live pill + bus counts
+- [x] Mobile-friendly nav (hamburger below `lg`)
+- [x] Browser → API direct + dev CORS (SSE; avoid Next rewrite for RT)
+
+### Phase 4b — Web deploy polish (before mobile)
+
+- [ ] Production deploy (web + API + worker + Postgres + Redis) — document host/env
+- [ ] CI: `pnpm typecheck` / `lint` on PRs
+- [ ] Unit tests for `transit-core` arrivals + alert filtering
+- [ ] Optional: map alert banner when not filtering by route; trip headsign on arrivals
 
 ### Phase 5 — Mobile (Expo)
 
@@ -75,13 +87,13 @@ Use `[x]` when done, `[ ]` when not started, `[~]` when in progress.
 
 ## Current focus
 
-**Phase:** 5 (Mobile — **STOP** until user tests web)
+**Phase:** 4b (Web deploy polish — **no mobile yet**)
 
-**Active goal:** User testing web app on desktop. Do not start Expo until Michael confirms.
+**Active goal:** Polish and validate web for initial deployment. Michael testing desktop + mobile viewport in devtools.
 
-**Blockers:** None documented.
+**Blockers:** None documented. Ensure `.env` includes `PRT_GTFSRT_TRIPS_URL` for live stop arrivals.
 
-**Last updated:** 2026-10-01
+**Last updated:** 2026-10-02
 
 ---
 
@@ -91,10 +103,11 @@ Append a short entry after each meaningful agent session (newest first).
 
 | Date | Author | Summary |
 |------|--------|---------|
+| 2026-10-02 | — | Trip updates ingest; stop arrivals API/UI; route alerts on route/map; routes live section; map SSE/CORS fix; mobile nav; AGENTS Phase 4b |
 | 2026-10-01 | — | Phase 3–4: GTFS-RT/Redis, live API, MapLibre web (map, routes, stops, alerts) |
-| 2026-10-01 | — | Phase 2: PostGIS docker, Drizzle schema, GTFS import, routes/stops API + client |
-| 2026-10-01 | — | Phase 0–1: pnpm monorepo, Hono API, worker stub, Next health page, mobile README stub |
-| 2026-10-01 | — | Added ARCHITECTURE.md, AGENTS.md; stack Option 1 defined; no code scaffold yet |
+| 2026-10-01 | — | Phase 2: PostGIS docker (host **5433**), Drizzle, GTFS import, routes/stops API |
+| 2026-10-01 | — | Phase 0–1: pnpm monorepo, Hono API, worker, Next web, mobile README stub |
+| 2026-10-01 | — | Added ARCHITECTURE.md, AGENTS.md; Option 1 stack |
 
 ---
 
@@ -102,6 +115,7 @@ Append a short entry after each meaningful agent session (newest first).
 
 | Date | Change |
 |------|--------|
+| 2026-10-02 | Trip-update snapshot + stop arrivals; web polish checklist (Phase 4b) |
 | 2026-10-01 | Initial architecture and agent handoff docs |
 
 ---

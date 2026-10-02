@@ -1,6 +1,8 @@
 import type { Db } from "@steel-city/db";
 import {
+  filterAlertsForRoute,
   findNearbyStops,
+  getArrivalsForStop,
   getRouteDetail,
   getStopDetail,
   listRoutes,
@@ -74,6 +76,44 @@ export function createV1Routes(deps: V1Deps) {
     return c.json({ stops });
   });
 
+  v1.get("/stops/:stopId/arrivals", async (c) => {
+    const db = deps.getDatabase();
+    const redis = deps.getRedis();
+    if (!db || !redis) {
+      return c.json({ error: "Realtime or database not configured" }, 503);
+    }
+
+    const stopId = c.req.param("stopId");
+    const stop = await getStopDetail(stopId, db);
+    if (!stop) {
+      return c.json({ error: "Stop not found" }, 404);
+    }
+
+    const snapshot = await readSnapshot(redis);
+    const rows = getArrivalsForStop(stopId, snapshot?.tripPredictions ?? []);
+    const routeById = new Map(stop.routes.map((r) => [r.routeId, r]));
+
+    const arrivals = rows.map((row) => {
+      const route = row.routeId ? routeById.get(row.routeId) : undefined;
+      return {
+        tripId: row.tripId,
+        routeId: row.routeId,
+        routeShortName: route?.routeShortName ?? null,
+        routeLongName: route?.routeLongName ?? null,
+        arrivalTime: row.arrivalTime,
+        departureTime: row.departureTime,
+        delaySeconds: row.delaySeconds,
+        minutesUntil: row.minutesUntil,
+      };
+    });
+
+    return c.json({
+      stopId,
+      arrivals,
+      fetchedAt: snapshot?.fetchedAt ?? null,
+    });
+  });
+
   v1.get("/stops/:stopId", async (c) => {
     const db = deps.getDatabase();
     if (!db) {
@@ -128,8 +168,13 @@ export function createV1Routes(deps: V1Deps) {
       return c.json({ error: "Realtime cache not configured" }, 503);
     }
     const snapshot = await readSnapshot(redis);
+    const routeId = c.req.query("routeId");
+    let alerts = snapshot?.alerts ?? [];
+    if (routeId) {
+      alerts = filterAlertsForRoute(alerts, routeId);
+    }
     return c.json({
-      alerts: snapshot?.alerts ?? [],
+      alerts,
       fetchedAt: snapshot?.fetchedAt ?? null,
     });
   });

@@ -1,6 +1,6 @@
 import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 
-import type { LiveVehicle, ServiceAlert } from "./types.js";
+import type { LiveVehicle, ServiceAlert, TripStopPrediction } from "./types.js";
 
 type TimestampLike = number | { toNumber(): number } | null | undefined;
 
@@ -89,4 +89,49 @@ export function decodeAlerts(buffer: Buffer): ServiceAlert[] {
   }
 
   return alerts;
+}
+
+const ScheduleRelationship =
+  GtfsRealtimeBindings.transit_realtime.TripUpdate.StopTimeUpdate.ScheduleRelationship;
+
+export function decodeTripUpdates(buffer: Buffer): TripStopPrediction[] {
+  const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(buffer);
+  const predictions: TripStopPrediction[] = [];
+
+  for (const entity of feed.entity) {
+    const tripUpdate = entity.tripUpdate;
+    if (!tripUpdate) continue;
+
+    const tripId = tripUpdate.trip?.tripId ?? entity.id;
+    if (!tripId) continue;
+
+    const routeId = tripUpdate.trip?.routeId ?? null;
+
+    for (const stu of tripUpdate.stopTimeUpdate ?? []) {
+      if (stu.scheduleRelationship === ScheduleRelationship.SKIPPED) continue;
+      const stopId = stu.stopId;
+      if (!stopId) continue;
+
+      const arrivalUnix = toUnixSeconds(stu.arrival?.time ?? null);
+      const departureUnix = toUnixSeconds(stu.departure?.time ?? null);
+      const delayRaw = stu.arrival?.delay ?? stu.departure?.delay ?? null;
+      const delaySeconds =
+        delayRaw !== null && delayRaw !== undefined ? Number(delayRaw) : null;
+
+      if (arrivalUnix === null && departureUnix === null && delaySeconds === null) {
+        continue;
+      }
+
+      predictions.push({
+        tripId,
+        routeId,
+        stopId,
+        arrivalTimeUnix: arrivalUnix,
+        departureTimeUnix: departureUnix,
+        delaySeconds,
+      });
+    }
+  }
+
+  return predictions;
 }

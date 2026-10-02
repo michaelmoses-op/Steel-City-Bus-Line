@@ -20,8 +20,18 @@ export type ServiceAlert = {
   activePeriods: { start: string | null; end: string | null }[];
 };
 
+export type TripStopPrediction = {
+  tripId: string;
+  routeId: string | null;
+  stopId: string;
+  arrivalTimeUnix: number | null;
+  departureTimeUnix: number | null;
+  delaySeconds: number | null;
+};
+
 export type RealtimeSnapshot = {
   vehicles: LiveVehicle[];
   alerts: ServiceAlert[];
+  tripPredictions: TripStopPrediction[];
   fetchedAt: string;
 };

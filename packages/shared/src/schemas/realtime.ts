@@ -37,6 +37,23 @@ export const alertsResponseSchema = z.object({
   fetchedAt: z.string().nullable(),
 });
 
+export const stopArrivalSchema = z.object({
+  tripId: z.string(),
+  routeId: z.string().nullable(),
+  routeShortName: z.string().nullable(),
+  routeLongName: z.string().nullable(),
+  arrivalTime: z.string().nullable(),
+  departureTime: z.string().nullable(),
+  delaySeconds: z.number().nullable(),
+  minutesUntil: z.number().nullable(),
+});
+
+export const stopArrivalsResponseSchema = z.object({
+  stopId: z.string(),
+  arrivals: z.array(stopArrivalSchema),
+  fetchedAt: z.string().nullable(),
+});
+
 export const stopDetailSchema = z.object({
   stopId: z.string(),
   stopName: z.string(),
@@ -53,4 +70,5 @@ export const stopDetailSchema = z.object({
 
 export type LiveVehicle = z.infer<typeof liveVehicleSchema>;
 export type ServiceAlert = z.infer<typeof serviceAlertSchema>;
+export type StopArrival = z.infer<typeof stopArrivalSchema>;
 export type StopDetail = z.infer<typeof stopDetailSchema>;

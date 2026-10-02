@@ -19,11 +19,22 @@ export {
 } from "./queries/static-data.js";
 export {
   decodeAlerts,
+  decodeTripUpdates,
   decodeVehiclePositions,
   fetchGtfsRtBuffer,
 } from "./realtime/decode.js";
+export {
+  filterAlertsForRoute,
+  getArrivalsForStop,
+  type StopArrivalRow,
+} from "./realtime/arrivals.js";
 export { filterDisplayVehicles, countStale } from "./realtime/quality.js";
 export { pollRealtimeFeeds, type RtFeedUrls } from "./realtime/poll.js";
 export { readSnapshot, writeSnapshot, type RedisLike } from "./realtime/snapshot-store.js";
 export { closeRedis, getRedis } from "./realtime/redis-client.js";
-export type { LiveVehicle, RealtimeSnapshot, ServiceAlert } from "./realtime/types.js";
+export type {
+  LiveVehicle,
+  RealtimeSnapshot,
+  ServiceAlert,
+  TripStopPrediction,
+} from "./realtime/types.js";

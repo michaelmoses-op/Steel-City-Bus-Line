@@ -15,5 +15,11 @@ export async function writeSnapshot(redis: RedisLike, snapshot: RealtimeSnapshot
 export async function readSnapshot(redis: RedisLike): Promise<RealtimeSnapshot | null> {
   const raw = await redis.get(REDIS_KEYS.snapshot);
   if (!raw) return null;
-  return JSON.parse(raw) as RealtimeSnapshot;
+  const parsed = JSON.parse(raw) as Partial<RealtimeSnapshot>;
+  return {
+    vehicles: parsed.vehicles ?? [],
+    alerts: parsed.alerts ?? [],
+    tripPredictions: parsed.tripPredictions ?? [],
+    fetchedAt: parsed.fetchedAt ?? new Date().toISOString(),
+  };
 }

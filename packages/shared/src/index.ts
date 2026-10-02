@@ -14,9 +14,12 @@ export {
   alertsResponseSchema,
   liveVehicleSchema,
   serviceAlertSchema,
+  stopArrivalSchema,
+  stopArrivalsResponseSchema,
   stopDetailSchema,
   vehiclesResponseSchema,
   type LiveVehicle,
   type ServiceAlert,
+  type StopArrival,
   type StopDetail,
 } from "./schemas/realtime.js";

@@ -4,6 +4,7 @@ import {
   nearbyStopsResponseSchema,
   routeDetailSchema,
   routesListResponseSchema,
+  stopArrivalsResponseSchema,
   stopDetailSchema,
   vehiclesResponseSchema,
   type HealthResponse,
@@ -12,6 +13,7 @@ import {
   type RouteDetail,
   type RouteSummary,
   type ServiceAlert,
+  type StopArrival,
   type StopDetail,
 } from "@steel-city/shared";
 
@@ -63,13 +65,29 @@ export function createApiClient(options: ApiClientOptions) {
       return getJson(`/api/v1/stops/${encodeURIComponent(stopId)}`, stopDetailSchema);
     },
 
+    getStopArrivals(stopId: string): Promise<{
+      stopId: string;
+      arrivals: StopArrival[];
+      fetchedAt: string | null;
+    }> {
+      return getJson(
+        `/api/v1/stops/${encodeURIComponent(stopId)}/arrivals`,
+        stopArrivalsResponseSchema,
+      );
+    },
+
     getVehicles(routeId?: string): Promise<{ vehicles: LiveVehicle[]; fetchedAt: string | null }> {
       const q = routeId ? `?routeId=${encodeURIComponent(routeId)}` : "";
       return getJson(`/api/v1/vehicles${q}`, vehiclesResponseSchema);
     },
 
-    getAlerts(): Promise<{ alerts: ServiceAlert[]; fetchedAt: string | null }> {
-      return getJson("/api/v1/alerts", alertsResponseSchema);
+    getAlerts(options?: {
+      routeId?: string;
+    }): Promise<{ alerts: ServiceAlert[]; fetchedAt: string | null }> {
+      const q = options?.routeId
+        ? `?routeId=${encodeURIComponent(options.routeId)}`
+        : "";
+      return getJson(`/api/v1/alerts${q}`, alertsResponseSchema);
     },
 
     subscribeVehicles(
