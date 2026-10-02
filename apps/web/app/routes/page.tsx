@@ -80,7 +80,6 @@ export default function RoutesPage() {
   return (
     <div className="space-y-6">
       <header>
-        <div className="pgh-checkered mb-3 h-1.5 w-24 rounded-sm" aria-hidden />
         <h1 className="text-2xl font-bold text-zinc-50">Routes</h1>
         <p className="mt-1 text-sm text-zinc-400">
           Routes with buses on the map right now appear first, with a live indicator.

@@ -74,7 +74,9 @@ export function RouteShapeMap({ shape, stops, routeColor }: Props) {
         source: "route-stops",
         paint: {
           "circle-radius": 4,
-          "circle-color": "#e4e4e7",
+          "circle-color": "#d4d4d8",
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#0a0a0a",
         },
       });
 

@@ -10,7 +10,6 @@ export default function MapPage() {
 
   return (
     <div>
-      <div className="pgh-checkered mb-4 h-1.5 w-24 rounded-sm" aria-hidden />
       <h1 className="text-2xl font-bold text-zinc-50">Live map</h1>
       <p className="mt-2 max-w-2xl text-sm text-zinc-400">
         Positions refresh over SSE. Stale GPS (&gt;2 min) is removed server-side.

@@ -35,11 +35,10 @@ export default async function Home() {
           <div>
             <p className="text-xs font-bold tracking-[0.2em] text-[#FFB612]">PITTSBURGH & ALLEGHENY COUNTY</p>
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-zinc-50">
-              Transit with steel-city clarity
+              Know where your bus is
             </h1>
             <p className="mt-2 max-w-2xl text-zinc-400">
-              Live buses, routes, stops, and alerts — built on PRT open data, with stale GPS filtered
-              so the map reflects what&apos;s actually moving.
+              Live buses, routes, stops, and alerts — built on PRT open data
             </p>
           </div>
         </div>

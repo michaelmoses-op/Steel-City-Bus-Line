@@ -12,11 +12,115 @@ const MAP_STYLE =
   process.env.NEXT_PUBLIC_MAP_STYLE ?? "https://tiles.openfreemap.org/styles/liberty";
 
 const VEHICLE_SOURCE_ID = "vehicles";
+const ROUTE_SHAPE_SOURCE_ID = "route-shape";
+const ROUTE_STOPS_SOURCE_ID = "route-stops";
+
+type MapPoint = { lat: number; lon: number };
+
+export type RouteMapOverlay = {
+  shape: MapPoint[] | null;
+  stops: MapPoint[];
+  routeColor?: string | null;
+};
 
 type Props = {
   routeId?: string;
   className?: string;
+  /** Route line + stop dots drawn under live vehicle markers */
+  routeOverlay?: RouteMapOverlay;
+  mapHeightClass?: string;
 };
+
+function lineColorFromRoute(routeColor: string | null | undefined): string {
+  return routeColor ? `#${routeColor}` : "#FFB612";
+}
+
+function fitMapToRoute(map: maplibregl.Map, shape: MapPoint[] | null, stops: MapPoint[]): void {
+  const points: [number, number][] = [];
+  if (shape && shape.length > 1) {
+    for (const p of shape) points.push([p.lon, p.lat]);
+  } else {
+    for (const s of stops) points.push([s.lon, s.lat]);
+  }
+  if (points.length === 0) return;
+  const bounds = points.reduce(
+    (b, c) => b.extend(c),
+    new maplibregl.LngLatBounds(points[0], points[0]),
+  );
+  map.fitBounds(bounds, { padding: 48, maxZoom: 14 });
+}
+
+function ensureRouteOverlay(map: maplibregl.Map, overlay: RouteMapOverlay): void {
+  const lineColor = lineColorFromRoute(overlay.routeColor);
+
+  const shapeFeature =
+    overlay.shape && overlay.shape.length > 1
+      ? {
+          type: "Feature" as const,
+          geometry: {
+            type: "LineString" as const,
+            coordinates: overlay.shape.map((p) => [p.lon, p.lat]),
+          },
+          properties: {},
+        }
+      : null;
+
+  const stopsCollection: GeoJSON.FeatureCollection = {
+    type: "FeatureCollection",
+    features: overlay.stops.map((s, i) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [s.lon, s.lat] },
+      properties: { i },
+    })),
+  };
+
+  const existingShape = map.getSource(ROUTE_SHAPE_SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
+  if (shapeFeature) {
+    if (existingShape) {
+      existingShape.setData(shapeFeature);
+    } else {
+      map.addSource(ROUTE_SHAPE_SOURCE_ID, { type: "geojson", data: shapeFeature });
+      map.addLayer({
+        id: "route-line",
+        type: "line",
+        source: ROUTE_SHAPE_SOURCE_ID,
+        paint: {
+          "line-color": lineColor,
+          "line-width": 4,
+          "line-opacity": 0.9,
+        },
+      });
+    }
+  } else if (existingShape) {
+    if (map.getLayer("route-line")) map.removeLayer("route-line");
+    map.removeSource(ROUTE_SHAPE_SOURCE_ID);
+  }
+
+  const existingStops = map.getSource(ROUTE_STOPS_SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
+  if (existingStops) {
+    existingStops.setData(stopsCollection);
+  } else {
+    map.addSource(ROUTE_STOPS_SOURCE_ID, { type: "geojson", data: stopsCollection });
+    map.addLayer({
+      id: "route-stops",
+      type: "circle",
+      source: ROUTE_STOPS_SOURCE_ID,
+      paint: {
+        "circle-radius": 4,
+        "circle-color": "#d4d4d8",
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#0a0a0a",
+      },
+    });
+  }
+
+  fitMapToRoute(map, overlay.shape, overlay.stops);
+}
+
+function raiseVehicleLayers(map: maplibregl.Map): void {
+  if (map.getLayer("vehicles-circle")) map.moveLayer("vehicles-circle");
+  if (map.getLayer("vehicles-label")) map.moveLayer("vehicles-label");
+}
 
 function buildRouteLabelMap(
   routes: { routeId: string; routeShortName: string | null }[],
@@ -85,7 +189,12 @@ function ensureVehicleLayers(map: maplibregl.Map): void {
   }
 }
 
-export function LiveMap({ routeId, className }: Props) {
+export function LiveMap({
+  routeId,
+  className,
+  routeOverlay,
+  mapHeightClass = "h-[min(70vh,640px)]",
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const mapReadyRef = useRef(false);
@@ -149,7 +258,11 @@ export function LiveMap({ routeId, className }: Props) {
 
     const onReady = () => {
       mapReadyRef.current = true;
+      if (routeOverlay) {
+        ensureRouteOverlay(map, routeOverlay);
+      }
       ensureVehicleLayers(map);
+      raiseVehicleLayers(map);
       pushVehicleDataToMap();
     };
 
@@ -166,6 +279,15 @@ export function LiveMap({ routeId, className }: Props) {
       mapRef.current = null;
     };
   }, [pushVehicleDataToMap]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReadyRef.current || !routeOverlay || !map.isStyleLoaded()) return;
+    ensureRouteOverlay(map, routeOverlay);
+    ensureVehicleLayers(map);
+    raiseVehicleLayers(map);
+    pushVehicleDataToMap();
+  }, [routeOverlay, pushVehicleDataToMap]);
 
   useEffect(() => {
     const client = getApi();
@@ -210,7 +332,7 @@ export function LiveMap({ routeId, className }: Props) {
       </div>
       <div
         ref={containerRef}
-        className="h-[min(70vh,640px)] w-full rounded-xl border border-zinc-800"
+        className={`${mapHeightClass} w-full rounded-xl border border-zinc-800`}
       />
     </div>
   );

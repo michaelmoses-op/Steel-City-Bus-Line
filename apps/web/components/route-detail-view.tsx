@@ -2,13 +2,21 @@
 
 import type { RouteDetail } from "@steel-city/shared";
 import Link from "next/link";
+import { useMemo } from "react";
 import { formatGtfsTime } from "@/lib/format-gtfs-time";
 import { LiveMap } from "./live-map";
 import { RouteAlertsPanel } from "./route-alerts-panel";
-import { RouteShapeMap } from "./route-shape-map";
 
 export function RouteDetailView({ route }: { route: RouteDetail }) {
   const badgeColor = route.routeColor ? `#${route.routeColor}` : "#FFB612";
+  const routeOverlay = useMemo(
+    () => ({
+      shape: route.shape,
+      stops: route.stops,
+      routeColor: route.routeColor,
+    }),
+    [route.shape, route.stops, route.routeColor],
+  );
 
   return (
     <div className="space-y-8">
@@ -44,13 +52,16 @@ export function RouteDetailView({ route }: { route: RouteDetail }) {
       </header>
 
       <section>
-        <h2 className="mb-2 text-lg font-medium text-zinc-100">Route shape</h2>
-        <RouteShapeMap shape={route.shape} stops={route.stops} routeColor={route.routeColor} />
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-lg font-medium text-zinc-100">Live vehicles</h2>
-        <LiveMap routeId={route.routeId} />
+        <h2 className="mb-2 text-lg font-medium text-zinc-100">Route map</h2>
+        <p className="mb-3 text-sm text-zinc-500">
+          Route line and stops with live bus positions updating over the map.
+        </p>
+        <LiveMap
+          key={route.routeId}
+          routeId={route.routeId}
+          mapHeightClass="h-[min(70vh,520px)]"
+          routeOverlay={routeOverlay}
+        />
       </section>
 
       <section>
