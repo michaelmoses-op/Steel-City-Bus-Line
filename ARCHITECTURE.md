@@ -1,6 +1,6 @@
-# Steel City Bus Line — Architecture
+# Steel City Bus Tracker — Architecture
 
-Pittsburgh metro transit app: accurate routes, live vehicle positions, and better UX than official tools. **Web first** (`apps/web`), **native mobile later** (`apps/mobile` via Expo), backed by a dedicated Node API that ingests PRT data.
+Pittsburgh metro transit tracking app: accurate routes, live vehicle positions, and strong map UX. **Web first** (`apps/web`), **native mobile later** (`apps/mobile` via Expo), backed by a dedicated Node API that ingests PRT data.
 
 This document is the source of truth for **what runs where** and **how data moves**. For implementation status and agent handoff, see [AGENTS.md](./AGENTS.md).
 
@@ -36,7 +36,7 @@ flowchart TB
     MobileApp[iOS / Android - Expo - later]
   end
 
-  subgraph our [Steel City Bus Line]
+  subgraph our [Steel City Bus Tracker]
     Web[apps/web - Next.js]
     API[services/api - Hono]
     Worker[services/worker - GTFS-RT ingest]

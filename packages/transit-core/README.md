@@ -1,6 +1,6 @@
 # @steel-city/transit-core
 
-Pure domain logic for Steel City Bus Line. **Must not import** Hono, Next.js, React, or fetch.
+Pure domain logic for Steel City Bus Tracker. **Must not import** Hono, Next.js, React, or fetch.
 
 ## Planned modules (Phase 2+)
 

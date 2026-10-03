@@ -51,7 +51,7 @@ export function SiteNav() {
                 <span className="block text-sm font-bold tracking-wide text-[#FFB612]">
                   STEEL CITY
                 </span>
-                <span className="block text-xs font-medium text-zinc-400">Bus Line</span>
+                <span className="block text-xs font-medium text-zinc-400">Bus Tracker</span>
               </div>
             </Link>
 

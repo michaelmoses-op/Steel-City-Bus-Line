@@ -1,6 +1,6 @@
-# Steel City Bus Line
+# Steel City Bus Tracker
 
-A Pittsburgh metro transit app focused on **accurate routes**, **live vehicle locations**, and a **better map UX** than official tools. Web first; iOS/Android via Expo later.
+A Pittsburgh metro transit app focused on **accurate PRT routes**, **live vehicle locations**, and a **better map UX**. Web first; iOS/Android via Expo later.
 
 ## Documentation
 

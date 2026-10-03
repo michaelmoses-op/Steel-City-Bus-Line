@@ -1,4 +1,4 @@
-# Steel City Bus Line — Mobile (Expo)
+# Steel City Bus Tracker — Mobile (Expo)
 
 **Not started.** Phase 5 will add an Expo Router app here that uses `@steel-city/api-client` and native maps.
 

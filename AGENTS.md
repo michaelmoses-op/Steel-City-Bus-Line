@@ -1,12 +1,12 @@
 # Agent & contributor guide
 
-Instructions for **Cursor agents** (including sessions started from a phone) and humans continuing work on **Steel City Bus Line**. Read this file first, then [ARCHITECTURE.md](./ARCHITECTURE.md) for technical boundaries.
+Instructions for **Cursor agents** (including sessions started from a phone) and humans continuing work on **Steel City Bus Tracker**. Read this file first, then [ARCHITECTURE.md](./ARCHITECTURE.md) for technical boundaries.
 
 ---
 
 ## Project intent
 
-Build a **better Pittsburgh-area transit experience**: reliable route/stop info, live vehicle positions, and strong map UX. Official apps often have wrong line info, weak live tracking, and poor interactivity—our edge is **presentation + a server-side “truth layer”** over PRT GTFS/GTFS-RT (staleness, labeling, detour messaging where feeds are incomplete).
+Build a **better Pittsburgh-area transit tracking experience**: reliable route/stop info, live vehicle positions, and strong map UX. Official apps often have wrong line info, weak live tracking, and poor interactivity—our edge is **presentation + a server-side “truth layer”** over PRT GTFS/GTFS-RT (staleness, labeling, detour messaging where feeds are incomplete).
 
 **Stack:** Option 1 — Next.js web + Hono API/worker + Postgres/PostGIS + Redis + Expo mobile later. Details in [ARCHITECTURE.md](./ARCHITECTURE.md).
 

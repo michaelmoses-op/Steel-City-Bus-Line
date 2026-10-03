@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Steel City Bus Line",
-  description: "Pittsburgh transit routes and live bus tracking",
+  title: "Steel City Bus Tracker",
+  description: "Pittsburgh transit routes, live bus tracking, and trip planning",
   icons: {
     icon: "/logo.jpg",
     apple: "/logo.jpg",

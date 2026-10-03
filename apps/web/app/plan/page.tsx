@@ -296,7 +296,7 @@ export default function PlanTripPage() {
         <section>
           <h2 className="mb-1 text-lg font-medium text-zinc-100">Itineraries</h2>
           <p className="mb-3 text-sm text-zinc-500">
-            Tap an option to update the route on the map above.
+            Tap an option to update the route on the map above and see live buses for those lines.
           </p>
           <ul className="space-y-4">
             {itineraries.map((it, i) => (
