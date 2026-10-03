@@ -6,6 +6,7 @@ import {
   getArrivalsForStop,
   getRouteDetail,
   getStopDetail,
+  listRouteMapShapes,
   listRoutes,
   planTripWithOtp,
   readSnapshot,
@@ -55,6 +56,15 @@ export function createV1Routes(deps: V1Deps) {
     }
     const routes = await listRoutes(db);
     return c.json({ routes });
+  });
+
+  v1.get("/routes/shapes", async (c) => {
+    const db = deps.getDatabase();
+    if (!db) {
+      return c.json({ error: "Database not configured" }, 503);
+    }
+    const shapes = await listRouteMapShapes(db);
+    return c.json({ shapes });
   });
 
   v1.get("/routes/:routeId", async (c) => {

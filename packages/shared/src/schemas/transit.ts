@@ -30,6 +30,17 @@ export const routesListResponseSchema = z.object({
   routes: z.array(routeSummarySchema),
 });
 
+export const routeMapShapeSchema = z.object({
+  routeId: z.string(),
+  routeShortName: z.string().nullable(),
+  routeColor: z.string().nullable(),
+  shape: z.array(z.object({ lat: z.number(), lon: z.number() })),
+});
+
+export const routeMapShapesResponseSchema = z.object({
+  shapes: z.array(routeMapShapeSchema),
+});
+
 export const nearbyStopSchema = z.object({
   stopId: z.string(),
   stopName: z.string(),
@@ -44,4 +55,5 @@ export const nearbyStopsResponseSchema = z.object({
 
 export type RouteSummary = z.infer<typeof routeSummarySchema>;
 export type RouteDetail = z.infer<typeof routeDetailSchema>;
+export type RouteMapShape = z.infer<typeof routeMapShapeSchema>;
 export type NearbyStop = z.infer<typeof nearbyStopSchema>;

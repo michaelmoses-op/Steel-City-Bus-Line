@@ -3,11 +3,14 @@ export {
   nearbyStopSchema,
   nearbyStopsResponseSchema,
   routeDetailSchema,
+  routeMapShapeSchema,
+  routeMapShapesResponseSchema,
   routeSummarySchema,
   routesListResponseSchema,
   stopOnRouteSchema,
   type NearbyStop,
   type RouteDetail,
+  type RouteMapShape,
   type RouteSummary,
 } from "./schemas/transit.js";
 export {

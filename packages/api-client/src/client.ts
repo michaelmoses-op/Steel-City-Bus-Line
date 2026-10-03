@@ -4,6 +4,7 @@ import {
   healthResponseSchema,
   nearbyStopsResponseSchema,
   routeDetailSchema,
+  routeMapShapesResponseSchema,
   routesListResponseSchema,
   stopArrivalsResponseSchema,
   stopDetailSchema,
@@ -13,6 +14,7 @@ import {
   type LiveVehicle,
   type NearbyStop,
   type RouteDetail,
+  type RouteMapShape,
   type RouteSummary,
   type ServiceAlert,
   type GeocodeResult,
@@ -52,6 +54,10 @@ export function createApiClient(options: ApiClientOptions) {
 
     getRoute(routeId: string): Promise<RouteDetail> {
       return getJson(`/api/v1/routes/${encodeURIComponent(routeId)}`, routeDetailSchema);
+    },
+
+    getRouteMapShapes(): Promise<RouteMapShape[]> {
+      return getJson("/api/v1/routes/shapes", routeMapShapesResponseSchema).then((r) => r.shapes);
     },
 
     getNearbyStops(lat: number, lon: number, radiusM = 500): Promise<NearbyStop[]> {

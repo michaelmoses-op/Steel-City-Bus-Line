@@ -2,9 +2,23 @@
 
 import type { RouteSummary } from "@steel-city/shared";
 import { useQuery } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { RouteListRow } from "@/components/route-list-row";
 import { getApi } from "@/lib/api";
+
+const RoutesOverviewMap = dynamic(
+  () => import("@/components/routes-overview-map").then((m) => m.RoutesOverviewMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="h-[min(55vh,480px)] w-full animate-pulse rounded-xl border border-zinc-800 bg-zinc-900"
+        aria-hidden
+      />
+    ),
+  },
+);
 
 function routeSortKey(r: RouteSummary): string {
   return (r.routeShortName ?? r.routeId).toLowerCase();
@@ -24,10 +38,18 @@ function matchesSearch(r: RouteSummary, term: string): boolean {
 
 export default function RoutesPage() {
   const [q, setQ] = useState("");
+  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
+  const [mapMode, setMapMode] = useState<"all" | "live">("all");
 
   const { data: routes, isLoading, error } = useQuery({
     queryKey: ["routes"],
     queryFn: () => getApi().getRoutes(),
+  });
+
+  const { data: routeShapes, isLoading: shapesLoading } = useQuery({
+    queryKey: ["route-map-shapes"],
+    queryFn: () => getApi().getRouteMapShapes(),
+    staleTime: 60 * 60 * 1000,
   });
 
   const {
@@ -75,6 +97,14 @@ export default function RoutesPage() {
     return { liveRoutes: live, otherRoutes: other };
   }, [routes, q, liveBusCountByRoute]);
 
+  const liveRouteIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const [routeId, count] of liveBusCountByRoute) {
+      if (count > 0) ids.add(routeId);
+    }
+    return ids;
+  }, [liveBusCountByRoute]);
+
   const showSplitSections = !q.trim();
 
   return (
@@ -85,6 +115,21 @@ export default function RoutesPage() {
           Routes with buses on the map right now appear first, with a live indicator.
         </p>
       </header>
+
+      <section aria-label="Routes map" className="pgh-steel-panel rounded-xl p-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-400">Route map</h2>
+        {shapesLoading && <p className="text-sm text-zinc-500">Loading route lines…</p>}
+        {routeShapes && routeShapes.length > 0 && (
+          <RoutesOverviewMap
+            shapes={routeShapes}
+            liveRouteIds={liveRouteIds}
+            selectedRouteId={selectedRouteId}
+            onSelectedRouteIdChange={setSelectedRouteId}
+            mapMode={mapMode}
+            onMapModeChange={setMapMode}
+          />
+        )}
+      </section>
 
       <input
         type="search"

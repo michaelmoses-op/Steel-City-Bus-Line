@@ -47,6 +47,95 @@ export type StopDetail = {
   }[];
 };
 
+export type RouteMapShape = {
+  routeId: string;
+  routeShortName: string | null;
+  routeColor: string | null;
+  shape: { lat: number; lon: number }[];
+};
+
+const MAP_SHAPE_MAX_POINTS = 72;
+
+function simplifyShape(
+  points: { lat: number; lon: number }[],
+  maxPoints = MAP_SHAPE_MAX_POINTS,
+): { lat: number; lon: number }[] {
+  if (points.length <= maxPoints) return points;
+  const out: { lat: number; lon: number }[] = [];
+  for (let i = 0; i < maxPoints; i++) {
+    const idx = Math.round((i / (maxPoints - 1)) * (points.length - 1));
+    out.push(points[idx]!);
+  }
+  return out;
+}
+
+/** One representative shape per route for map overlay (downsampled). */
+export async function listRouteMapShapes(db: Db): Promise<RouteMapShape[]> {
+  const result = await db.execute<{
+    route_id: string;
+    route_short_name: string | null;
+    route_color: string | null;
+    lat: number;
+    lon: number;
+    shape_pt_sequence: number;
+  }>(sql`
+    WITH rep AS (
+      SELECT DISTINCT ON (t.route_id) t.route_id, t.shape_id
+      FROM trips t
+      WHERE t.shape_id IS NOT NULL
+      ORDER BY t.route_id, t.trip_id
+    )
+    SELECT
+      r.route_id,
+      r.route_short_name,
+      r.route_color,
+      sp.lat,
+      sp.lon,
+      sp.shape_pt_sequence
+    FROM rep
+    INNER JOIN routes r ON r.route_id = rep.route_id
+    INNER JOIN shape_points sp ON sp.shape_id = rep.shape_id
+    ORDER BY r.route_id, sp.shape_pt_sequence
+  `);
+
+  const byRoute = new Map<
+    string,
+    { routeShortName: string | null; routeColor: string | null; points: { lat: number; lon: number }[] }
+  >();
+
+  for (const row of result) {
+    let entry = byRoute.get(row.route_id);
+    if (!entry) {
+      entry = {
+        routeShortName: row.route_short_name,
+        routeColor: row.route_color,
+        points: [],
+      };
+      byRoute.set(row.route_id, entry);
+    }
+    entry.points.push({ lat: row.lat, lon: row.lon });
+  }
+
+  const shapes: RouteMapShape[] = [];
+  for (const [routeId, entry] of byRoute) {
+    if (entry.points.length < 2) continue;
+    shapes.push({
+      routeId,
+      routeShortName: entry.routeShortName,
+      routeColor: entry.routeColor,
+      shape: simplifyShape(entry.points),
+    });
+  }
+
+  shapes.sort((a, b) =>
+    (a.routeShortName ?? a.routeId).localeCompare(b.routeShortName ?? b.routeId, undefined, {
+      numeric: true,
+    }),
+  );
+
+  return shapes;
+}
+
 export async function listRoutes(db: Db): Promise<RouteSummary[]> {
   const rows = await db
     .select({
