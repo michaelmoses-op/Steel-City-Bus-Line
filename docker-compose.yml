@@ -26,5 +26,21 @@ services:
       timeout: 3s
       retries: 5
 
+  # Trip planner — enable with: pnpm otp:build && pnpm otp:up
+  otp:
+    profiles: ["otp"]
+    image: opentripplanner/opentripplanner:2.7.0
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./infra/otp:/var/opentripplanner
+    environment:
+      # Graph build needs more heap; clipped Pittsburgh OSM fits ~4g (raise if you OOM again).
+      JAVA_TOOL_OPTIONS: "-Xmx4g"
+    command:
+      - --load
+      - --serve
+      - --port
+      - "8080"
 volumes:
   pgdata:

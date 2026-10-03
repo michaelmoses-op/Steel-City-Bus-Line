@@ -1,0 +1,19 @@
+{
+  "osmCacheDataInMem": false,
+  "transitFeeds": [
+    {
+      "type": "gtfs",
+      "source": "gtfs/gtfs.zip",
+      "feedId": "prt"
+    }
+  ],
+  "osm": [
+    {
+      "source": "osm/pittsburgh.osm.pbf",
+      "osmTagMapping": "default"
+    }
+  ],
+  "timeZone": "America/New_York",
+  "transitServiceStart": "2025-01-01",
+  "transitServiceEnd": "2027-12-31"
+}

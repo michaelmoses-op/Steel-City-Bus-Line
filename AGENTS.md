@@ -72,6 +72,8 @@ Use `[x]` when done, `[ ]` when not started, `[~]` when in progress.
 
 ### Phase 4b — Web deploy polish (before mobile)
 
+- [x] **Plan trip** — own nav tab `/plan`; geocode + OTP proxy API; UI (leave now / depart / arrive, best vs fewest transfers). **Needs `OTP_BASE_URL` + local OTP graph.**
+- [~] Itinerary preview on map; link legs to route detail — map + leg geometry on `/plan`; route links TBD
 - [ ] Production deploy (web + API + worker + Postgres + Redis) — document host/env
 - [ ] CI: `pnpm typecheck` / `lint` on PRs
 - [ ] Unit tests for `transit-core` arrivals + alert filtering
@@ -89,7 +91,7 @@ Use `[x]` when done, `[ ]` when not started, `[~]` when in progress.
 
 **Phase:** 4b (Web deploy polish — **no mobile yet**)
 
-**Active goal:** Polish and validate web for initial deployment. Michael testing desktop + mobile viewport in devtools.
+**Active goal:** Polish web for initial deployment; trip planner tab added (wire up OpenTripPlanner for live results).
 
 **Blockers:** None documented. Ensure `.env` includes `PRT_GTFSRT_TRIPS_URL` for live stop arrivals.
 

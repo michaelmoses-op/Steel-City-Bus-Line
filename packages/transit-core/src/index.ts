@@ -28,6 +28,15 @@ export {
   getArrivalsForStop,
   type StopArrivalRow,
 } from "./realtime/arrivals.js";
+export { geocodePlace, type GeocodeHit } from "./plan/geocode.js";
+export {
+  planTripWithOtp,
+  type NormalizedItinerary,
+  type NormalizedLeg,
+  type PlanOptimize,
+  type PlanTimeMode,
+  type PlanTripInput,
+} from "./plan/otp-plan.js";
 export { filterDisplayVehicles, countStale } from "./realtime/quality.js";
 export { pollRealtimeFeeds, type RtFeedUrls } from "./realtime/poll.js";
 export { readSnapshot, writeSnapshot, type RedisLike } from "./realtime/snapshot-store.js";

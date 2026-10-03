@@ -185,6 +185,8 @@ Base path: `/api/v1` (exact prefix TBD at scaffold).
 | GET | `/routes/:id` | Route detail + stops |
 | GET | `/stops/nearby` | `lat`, `lon`, `radius` |
 | GET | `/stops/:id/arrivals` | Predictions merged static + RT |
+| GET | `/geocode` | `q` — address search (Nominatim via API) |
+| GET | `/plan` | Trip plan via OpenTripPlanner (`OTP_BASE_URL`) |
 | GET | `/vehicles` | Current snapshot |
 | GET | `/vehicles/stream` | SSE live updates |
 | GET | `/alerts` | Service alerts |

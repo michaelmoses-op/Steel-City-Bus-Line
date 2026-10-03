@@ -23,3 +23,14 @@ export {
   type StopArrival,
   type StopDetail,
 } from "./schemas/realtime.js";
+export {
+  geocodeResponseSchema,
+  geocodeResultSchema,
+  tripItinerarySchema,
+  tripLegSchema,
+  tripPlanResponseSchema,
+  type GeocodeResult,
+  type TripItinerary,
+  type TripLeg,
+  type TripPlanResponse,
+} from "./schemas/plan.js";

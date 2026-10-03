@@ -2,10 +2,12 @@ import type { Db } from "@steel-city/db";
 import {
   filterAlertsForRoute,
   findNearbyStops,
+  geocodePlace,
   getArrivalsForStop,
   getRouteDetail,
   getStopDetail,
   listRoutes,
+  planTripWithOtp,
   readSnapshot,
   type LiveVehicle,
   type RedisLike,
@@ -18,6 +20,19 @@ const nearbyQuerySchema = z.object({
   lat: z.coerce.number().min(-90).max(90),
   lon: z.coerce.number().min(-180).max(180),
   radius: z.coerce.number().min(50).max(5000).optional().default(500),
+});
+
+const planQuerySchema = z.object({
+  fromLat: z.coerce.number().min(-90).max(90),
+  fromLon: z.coerce.number().min(-180).max(180),
+  toLat: z.coerce.number().min(-90).max(90),
+  toLon: z.coerce.number().min(-180).max(180),
+  timeMode: z.enum(["leave_now", "depart_at", "arrive_by"]),
+  dateTime: z.string().optional(),
+  optimize: z.enum(["best", "fewest_transfers"]),
+  walkPreference: z.enum(["default", "less"]).optional().default("less"),
+  fromLabel: z.string().optional(),
+  toLabel: z.string().optional(),
 });
 
 export type V1Deps = {
@@ -177,6 +192,128 @@ export function createV1Routes(deps: V1Deps) {
       alerts,
       fetchedAt: snapshot?.fetchedAt ?? null,
     });
+  });
+
+  v1.get("/geocode", async (c) => {
+    const q = c.req.query("q") ?? "";
+    try {
+      const results = await geocodePlace(q);
+      return c.json({ results });
+    } catch (err) {
+      console.error("[api] geocode failed", err);
+      return c.json({ error: "Geocoding unavailable" }, 502);
+    }
+  });
+
+  v1.get("/plan", async (c) => {
+    const otpBase = process.env.OTP_BASE_URL;
+    if (!otpBase) {
+      return c.json(
+        {
+          error: "Trip planner not configured",
+          hint: "Set OTP_BASE_URL and run OpenTripPlanner with PRT GTFS (see README).",
+        },
+        503,
+      );
+    }
+
+    const parsed = planQuerySchema.safeParse({
+      fromLat: c.req.query("fromLat"),
+      fromLon: c.req.query("fromLon"),
+      toLat: c.req.query("toLat"),
+      toLon: c.req.query("toLon"),
+      timeMode: c.req.query("timeMode"),
+      dateTime: c.req.query("dateTime"),
+      optimize: c.req.query("optimize"),
+      walkPreference: c.req.query("walkPreference"),
+      fromLabel: c.req.query("fromLabel"),
+      toLabel: c.req.query("toLabel"),
+    });
+
+    if (!parsed.success) {
+      return c.json({ error: "Invalid query", details: parsed.error.flatten() }, 400);
+    }
+
+    const {
+      fromLat,
+      fromLon,
+      toLat,
+      toLon,
+      timeMode,
+      dateTime,
+      optimize,
+      walkPreference,
+      fromLabel,
+      toLabel,
+    } = parsed.data;
+
+    if (timeMode !== "leave_now" && !dateTime) {
+      return c.json({ error: "dateTime required for depart_at and arrive_by" }, 400);
+    }
+
+    try {
+      let planFromLat = fromLat;
+      let planFromLon = fromLon;
+      let planToLat = toLat;
+      let planToLon = toLon;
+      let accessNote: string | null = null;
+
+      const db = deps.getDatabase();
+      const stopSnapRadius = walkPreference === "less" ? 1200 : 600;
+      if (db) {
+        const [fromStops, toStops] = await Promise.all([
+          findNearbyStops(fromLat, fromLon, stopSnapRadius, db),
+          findNearbyStops(toLat, toLon, stopSnapRadius, db),
+        ]);
+        if (fromStops[0]) {
+          planFromLat = fromStops[0].lat;
+          planFromLon = fromStops[0].lon;
+        }
+        if (toStops[0]) {
+          planToLat = toStops[0].lat;
+          planToLon = toStops[0].lon;
+        }
+        if (fromStops[0] || toStops[0]) {
+          accessNote = "Trip planning uses the nearest bus stops to your chosen points (walk shown in legs when OSM is loaded).";
+        }
+      }
+
+      const { itineraries, plannerNote } = await planTripWithOtp(otpBase, {
+        fromLat: planFromLat,
+        fromLon: planFromLon,
+        toLat: planToLat,
+        toLon: planToLon,
+        timeMode,
+        dateTime,
+        optimize,
+        walkPreference,
+      });
+
+      const combinedNote =
+        [accessNote, plannerNote].filter(Boolean).join(" ") || null;
+
+      return c.json({
+        from: { lat: fromLat, lon: fromLon, label: fromLabel ?? null },
+        to: { lat: toLat, lon: toLon, label: toLabel ?? null },
+        itineraries,
+        plannerNote: combinedNote,
+      });
+    } catch (err) {
+      console.error("[api] plan failed", err);
+      const refused =
+        err instanceof Error &&
+        "cause" in err &&
+        err.cause instanceof AggregateError &&
+        err.cause.errors.some(
+          (e) => e instanceof Error && "code" in e && e.code === "ECONNREFUSED",
+        );
+      const message = refused
+        ? "Trip planner is not reachable. Run pnpm otp:up and ensure OTP is listening on OTP_BASE_URL."
+        : err instanceof Error
+          ? err.message
+          : "Trip planning failed";
+      return c.json({ error: message }, 502);
+    }
   });
 
   return v1;

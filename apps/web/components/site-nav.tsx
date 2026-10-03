@@ -7,6 +7,7 @@ import { LogoMark } from "./logo";
 
 const links = [
   { href: "/", label: "Home" },
+  { href: "/plan", label: "Plan trip" },
   { href: "/map", label: "Live map" },
   { href: "/routes", label: "Routes" },
   { href: "/stops", label: "Stops" },

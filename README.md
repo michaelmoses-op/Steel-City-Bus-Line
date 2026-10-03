@@ -58,6 +58,27 @@ The home page calls the API via `@steel-city/api-client` and shows JSON when the
 
 Next.js · Hono (Node) · PostgreSQL/PostGIS · Redis · Expo (mobile, later) · TypeScript monorepo (pnpm).
 
+## Trip planning (OpenTripPlanner)
+
+The **Plan trip** page uses the API → OpenTripPlanner (`OTP_BASE_URL`). One-time setup:
+
+```bash
+# From repo root (Docker Desktop running)
+pnpm otp:fetch-gtfs    # PRT GTFS.zip → infra/otp/gtfs/
+pnpm otp:build         # downloads PA OSM, clips to Pittsburgh bbox, builds graph (~10–25 min, Docker ≥4GB RAM)
+pnpm otp:up            # OTP on http://127.0.0.1:8080
+```
+
+`otp:build` runs `otp:prepare-osm` (one-time ~300MB PA download, then a small Pittsburgh extract). If build fails with **Java heap space**, raise Docker Desktop memory (Settings → Resources) or set `JAVA_TOOL_OPTIONS=-Xmx6g` on the `otp` service in `docker-compose.yml`.
+
+After changing OSM/GTFS inputs, delete `infra/otp/graph.obj` and run `pnpm otp:build` again.
+
+Ensure `.env` has `OTP_BASE_URL=http://127.0.0.1:8080`, then restart `pnpm dev`.
+
+When PRT publishes a new GTFS bundle, run `pnpm otp:fetch-gtfs` and `pnpm otp:build` again, then `pnpm otp:up`.
+
+Geocoding uses OpenStreetMap Nominatim via the API — set a real `GEOCODE_USER_AGENT` in production.
+
 ## Status
 
-**Web app (Phase 4) is feature-complete for v1 testing** — live map, routes, stops, alerts. Mobile (Expo) not started. See [AGENTS.md](./AGENTS.md).
+**Web app** — live map, routes, stops, alerts, trip planner UI (OTP required for results). Mobile (Expo) not started. See [AGENTS.md](./AGENTS.md).

@@ -1,5 +1,6 @@
 import type { RouteSummary } from "@steel-city/shared";
 import Link from "next/link";
+import { getRouteBadgeStyle } from "@/lib/route-badge-style";
 
 type Props = {
   route: RouteSummary;
@@ -8,8 +9,7 @@ type Props = {
 
 export function RouteListRow({ route, liveBusCount }: Props) {
   const isLive = liveBusCount !== undefined && liveBusCount > 0;
-  const badgeBg = route.routeColor ? `#${route.routeColor}` : "#FFB612";
-  const badgeFg = route.routeTextColor ? `#${route.routeTextColor}` : "#0a0a0a";
+  const badgeStyle = getRouteBadgeStyle(route.routeColor, route.routeTextColor);
 
   return (
     <li>
@@ -19,7 +19,7 @@ export function RouteListRow({ route, liveBusCount }: Props) {
       >
         <span
           className="min-w-[3rem] shrink-0 rounded px-2 py-0.5 text-center text-sm font-bold"
-          style={{ backgroundColor: badgeBg, color: badgeFg }}
+          style={badgeStyle}
         >
           {route.routeShortName ?? route.routeId}
         </span>

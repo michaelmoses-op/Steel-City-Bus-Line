@@ -1,11 +1,13 @@
 import {
   alertsResponseSchema,
+  geocodeResponseSchema,
   healthResponseSchema,
   nearbyStopsResponseSchema,
   routeDetailSchema,
   routesListResponseSchema,
   stopArrivalsResponseSchema,
   stopDetailSchema,
+  tripPlanResponseSchema,
   vehiclesResponseSchema,
   type HealthResponse,
   type LiveVehicle,
@@ -13,8 +15,10 @@ import {
   type RouteDetail,
   type RouteSummary,
   type ServiceAlert,
+  type GeocodeResult,
   type StopArrival,
   type StopDetail,
+  type TripPlanResponse,
 } from "@steel-city/shared";
 
 export type ApiClientOptions = {
@@ -79,6 +83,38 @@ export function createApiClient(options: ApiClientOptions) {
     getVehicles(routeId?: string): Promise<{ vehicles: LiveVehicle[]; fetchedAt: string | null }> {
       const q = routeId ? `?routeId=${encodeURIComponent(routeId)}` : "";
       return getJson(`/api/v1/vehicles${q}`, vehiclesResponseSchema);
+    },
+
+    geocode(query: string): Promise<{ results: GeocodeResult[] }> {
+      const params = new URLSearchParams({ q: query });
+      return getJson(`/api/v1/geocode?${params}`, geocodeResponseSchema);
+    },
+
+    planTrip(params: {
+      fromLat: number;
+      fromLon: number;
+      toLat: number;
+      toLon: number;
+      timeMode: "leave_now" | "depart_at" | "arrive_by";
+      dateTime?: string;
+      optimize: "best" | "fewest_transfers";
+      walkPreference?: "default" | "less";
+      fromLabel?: string;
+      toLabel?: string;
+    }): Promise<TripPlanResponse> {
+      const q = new URLSearchParams({
+        fromLat: String(params.fromLat),
+        fromLon: String(params.fromLon),
+        toLat: String(params.toLat),
+        toLon: String(params.toLon),
+        timeMode: params.timeMode,
+        optimize: params.optimize,
+        walkPreference: params.walkPreference ?? "less",
+      });
+      if (params.dateTime) q.set("dateTime", params.dateTime);
+      if (params.fromLabel) q.set("fromLabel", params.fromLabel);
+      if (params.toLabel) q.set("toLabel", params.toLabel);
+      return getJson(`/api/v1/plan?${q}`, tripPlanResponseSchema);
     },
 
     getAlerts(options?: {
