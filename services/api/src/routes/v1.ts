@@ -125,6 +125,8 @@ export function createV1Routes(deps: V1Deps) {
         routeId: row.routeId,
         routeShortName: route?.routeShortName ?? null,
         routeLongName: route?.routeLongName ?? null,
+        routeColor: route?.routeColor ?? null,
+        routeTextColor: route?.routeTextColor ?? null,
         arrivalTime: row.arrivalTime,
         departureTime: row.departureTime,
         delaySeconds: row.delaySeconds,

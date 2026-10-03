@@ -42,6 +42,8 @@ export const stopArrivalSchema = z.object({
   routeId: z.string().nullable(),
   routeShortName: z.string().nullable(),
   routeLongName: z.string().nullable(),
+  routeColor: z.string().nullable(),
+  routeTextColor: z.string().nullable(),
   arrivalTime: z.string().nullable(),
   departureTime: z.string().nullable(),
   delaySeconds: z.number().nullable(),
@@ -64,6 +66,8 @@ export const stopDetailSchema = z.object({
       routeId: z.string(),
       routeShortName: z.string().nullable(),
       routeLongName: z.string().nullable(),
+      routeColor: z.string().nullable(),
+      routeTextColor: z.string().nullable(),
     }),
   ),
 });

@@ -4,6 +4,7 @@ import type { StopArrival } from "@steel-city/shared";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getApi } from "@/lib/api";
+import { getRouteBadgeStyle } from "@/lib/route-badge-style";
 
 function formatCountdown(arrival: StopArrival): string {
   if (arrival.minutesUntil === null) return "—";
@@ -89,7 +90,8 @@ export function StopArrivalsBoard({ stopId }: Props) {
                   {a.routeId ? (
                     <Link
                       href={`/routes/${encodeURIComponent(a.routeId)}`}
-                      className="flex h-9 w-12 items-center justify-center rounded-lg bg-[#FFB612] text-sm font-bold text-black hover:brightness-105"
+                      className="flex min-w-[3rem] items-center justify-center rounded px-2 py-0.5 text-center text-sm font-bold hover:brightness-105"
+                      style={getRouteBadgeStyle(a.routeColor, a.routeTextColor)}
                     >
                       {routeLabel}
                     </Link>

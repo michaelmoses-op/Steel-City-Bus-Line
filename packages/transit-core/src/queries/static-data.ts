@@ -44,6 +44,8 @@ export type StopDetail = {
     routeId: string;
     routeShortName: string | null;
     routeLongName: string | null;
+    routeColor: string | null;
+    routeTextColor: string | null;
   }[];
 };
 
@@ -226,6 +228,8 @@ export async function getStopDetail(stopId: string, db: Db): Promise<StopDetail 
       routeId: routes.routeId,
       routeShortName: routes.routeShortName,
       routeLongName: routes.routeLongName,
+      routeColor: routes.routeColor,
+      routeTextColor: routes.routeTextColor,
     })
     .from(stopTimes)
     .innerJoin(trips, eq(stopTimes.tripId, trips.tripId))
