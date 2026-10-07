@@ -4,6 +4,13 @@
  */
 export { TRANSIT_CORE_VERSION } from "./version.js";
 export { parseGtfsCsv, type GtfsRow } from "./gtfs/parse.js";
+export {
+  PRT_GTFS_DEFAULT_URL,
+  PRT_GTFS_DEV_PAGE,
+  PRT_GTFS_LEGACY_URL,
+  discoverPrtGtfsUrlFromDevPage,
+  resolvePrtGtfsUrl,
+} from "./gtfs/prt-gtfs-url.js";
 export type { GtfsStaticTables } from "./gtfs/import-types.js";
 export { importGtfsTables, type ImportGtfsResult } from "./gtfs/import-to-db.js";
 export {

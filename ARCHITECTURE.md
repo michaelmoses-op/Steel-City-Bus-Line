@@ -199,7 +199,7 @@ OpenAPI/Zod documentation can be added on Hono when routes are implemented.
 
 | Resource | URL / location | Format |
 |----------|----------------|--------|
-| Static GTFS | [PRT Developer Resources](https://beta.rideprt.org/business-resources/web-developer-resources/) | GTFS zip |
+| Static GTFS | [PRT Developer Resources](https://rideprt.org/business-resources/web-developer-resources/) | CMS `gtfs.zip` (see `resolvePrtGtfsUrl` in transit-core) |
 | Bus GTFS-RT | `https://truetime.rideprt.org/gtfsrt-bus/` (vehicles, trips, alerts) | Protobuf |
 | Light rail GTFS-RT | PRT train GTFS-RT endpoints (see developer page) | Protobuf |
 | TrueTime API | Account-gated; optional later | REST |

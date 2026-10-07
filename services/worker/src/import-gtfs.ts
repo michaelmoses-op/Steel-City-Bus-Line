@@ -2,7 +2,12 @@ import "./load-env.js";
 
 import AdmZip from "adm-zip";
 import { createDbConnection } from "@steel-city/db";
-import { importGtfsTables, parseGtfsCsv, type GtfsStaticTables } from "@steel-city/transit-core";
+import {
+  importGtfsTables,
+  parseGtfsCsv,
+  resolvePrtGtfsUrl,
+  type GtfsStaticTables,
+} from "@steel-city/transit-core";
 
 function readGtfsFromZip(buffer: Buffer): GtfsStaticTables {
   const zip = new AdmZip(buffer);
@@ -30,16 +35,13 @@ function readGtfsFromZip(buffer: Buffer): GtfsStaticTables {
 }
 
 async function main(): Promise<void> {
-  const url = process.env.PRT_GTFS_URL;
   const databaseUrl = process.env.DATABASE_URL;
 
-  if (!url) {
-    throw new Error("PRT_GTFS_URL is not set");
-  }
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
 
+  const url = await resolvePrtGtfsUrl(process.env.PRT_GTFS_URL);
   console.log(`[import-gtfs] downloading ${url}`);
   const response = await fetch(url);
   if (!response.ok) {

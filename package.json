@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "turbo dev --filter=!@steel-city/mobile",
     "build:packages": "turbo run build --filter=./packages/*",
-    "db:up": "docker compose up -d postgres redis",
+    "db:up": "docker compose up -d --wait postgres redis",
     "db:down": "docker compose down",
     "otp:fetch-gtfs": "node scripts/otp-fetch-gtfs.mjs",
     "otp:fetch-osm": "node scripts/otp-fetch-osm.mjs",
