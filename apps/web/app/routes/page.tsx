@@ -4,6 +4,8 @@ import type { RouteSummary } from "@steel-city/shared";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
+import { PageHeading } from "@/components/page-heading";
+import { PlanOptionGroup } from "@/components/plan-option-group";
 import { RouteListRow } from "@/components/route-list-row";
 import { getApi } from "@/lib/api";
 
@@ -109,15 +111,24 @@ export default function RoutesPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold text-zinc-50">Routes</h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          Routes with buses on the map right now appear first, with a live indicator.
-        </p>
-      </header>
+      <PageHeading
+        title="Routes"
+        actions={
+          <PlanOptionGroup
+            legend="Map routes"
+            hideLegend
+            name="routes-map-mode"
+            value={mapMode}
+            onChange={setMapMode}
+            options={[
+              { id: "all", label: "All routes" },
+              { id: "live", label: "Live only" },
+            ]}
+          />
+        }
+      />
 
-      <section aria-label="Routes map" className="pgh-steel-panel rounded-xl p-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-400">Route map</h2>
+      <section aria-label="Routes map" className="pgh-steel-panel overflow-hidden rounded-2xl p-3 sm:p-4">
         {shapesLoading && <p className="text-sm text-zinc-500">Loading route lines…</p>}
         {routeShapes && routeShapes.length > 0 && (
           <RoutesOverviewMap
@@ -126,7 +137,6 @@ export default function RoutesPage() {
             selectedRouteId={selectedRouteId}
             onSelectedRouteIdChange={setSelectedRouteId}
             mapMode={mapMode}
-            onMapModeChange={setMapMode}
           />
         )}
       </section>
@@ -136,7 +146,7 @@ export default function RoutesPage() {
         placeholder="Search by number or name…"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
+        className="pgh-input w-full px-5 py-3.5 text-sm"
       />
 
       {isLoading && <p className="text-zinc-500">Loading routes…</p>}
@@ -158,16 +168,10 @@ export default function RoutesPage() {
 
       {showSplitSections && liveRoutes.length > 0 && (
         <section aria-labelledby="live-routes-heading">
-          <h2
-            id="live-routes-heading"
-            className="mb-2 flex flex-wrap items-baseline gap-2 text-sm font-semibold uppercase tracking-wide text-[#FFB612]"
-          >
-            Live now
-            <span className="text-xs font-normal normal-case text-zinc-500">
-              {liveRoutes.length} {liveRoutes.length === 1 ? "route" : "routes"} with active buses
-            </span>
+          <h2 id="live-routes-heading" className="pgh-section-label mb-3">
+            Live now · {liveRoutes.length} routes
           </h2>
-          <ul className="divide-y divide-zinc-800 rounded-xl border border-[#FFB612]/30 bg-zinc-950/50">
+          <ul className="divide-y divide-zinc-800 overflow-hidden rounded-2xl border border-zinc-800 bg-pgh-panel">
             {liveRoutes.map((r) => (
               <RouteListRow
                 key={r.routeId}
@@ -187,7 +191,7 @@ export default function RoutesPage() {
           >
             {liveRoutes.length > 0 ? "All other routes" : "All routes"}
           </h2>
-          <ul className="divide-y divide-zinc-800 rounded-xl border border-zinc-800">
+          <ul className="divide-y divide-zinc-800 overflow-hidden rounded-2xl border border-zinc-800 bg-pgh-panel">
             {otherRoutes.map((r) => (
               <RouteListRow key={r.routeId} route={r} />
             ))}

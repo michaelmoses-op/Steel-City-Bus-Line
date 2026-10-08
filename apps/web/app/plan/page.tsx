@@ -4,6 +4,7 @@ import type { GeocodeResult, TripItinerary } from "@steel-city/shared";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { PageHeading } from "@/components/page-heading";
 import { PlanOptionGroup, PlanToggle } from "@/components/plan-option-group";
 import { PlaceSearchField } from "@/components/place-search-field";
 import { getApi } from "@/lib/api";
@@ -54,46 +55,39 @@ function ItineraryCard({
       <button
         type="button"
         onClick={onSelect}
-        className={`pgh-steel-panel w-full cursor-pointer rounded-xl p-4 text-left transition ${
-          selected
-            ? "border-2 border-[#FFB612] shadow-[0_0_0_1px_#FFB612]"
-            : "hover:border-zinc-500"
+        className={`pgh-steel-panel w-full cursor-pointer rounded-2xl p-5 text-left transition ${
+          selected ? "ring-2 ring-pgh-gold ring-offset-2 ring-offset-black" : "hover:border-zinc-600"
         }`}
       >
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="font-semibold text-zinc-100">Option {index + 1}</h3>
-        <span className="text-sm text-zinc-400">
-          {formatClock(it.startTime)} → {formatClock(it.endTime)} · {formatDuration(it.durationSec)}
-          {it.transfers > 0 && ` · ${it.transfers} transfer${it.transfers === 1 ? "" : "s"}`}
-        </span>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-pgh-gold">
+          {index === 0 ? "Best route" : index === 1 ? "Alternate" : `Option ${index + 1}`}
+        </p>
+        <p className="font-[family-name:var(--font-display)] text-4xl leading-none text-zinc-50">
+          {formatDuration(it.durationSec)}
+        </p>
       </div>
-      <ol className="mt-4 space-y-3">
+      <p className="mt-1 text-xs text-zinc-500">
+        {formatClock(it.startTime)} → {formatClock(it.endTime)}
+        {it.transfers > 0 && ` · ${it.transfers} transfer${it.transfers === 1 ? "" : "s"}`}
+      </p>
+      <ol className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-2 text-sm text-zinc-300">
         {it.legs.map((leg, i) => (
-          <li key={`${leg.fromName}-${leg.toName}-${i}`} className="flex gap-3 text-sm">
-            <span
-              className={`mt-0.5 min-w-[2.75rem] shrink-0 rounded px-2 py-0.5 text-center text-xs font-bold ${
-                leg.mode === "WALK" ? "bg-zinc-800 text-zinc-300" : ""
-              }`}
-              style={
-                leg.mode === "TRANSIT"
-                  ? getRouteBadgeStyle(leg.routeColor, leg.routeTextColor)
-                  : undefined
-              }
-            >
-              {leg.mode === "WALK" ? "Walk" : (leg.routeShortName ?? "Bus")}
-            </span>
-            <div className="min-w-0 text-zinc-300">
-              <p>
-                {leg.fromName} → {leg.toName}
-              </p>
-              {leg.headsign && <p className="text-xs text-zinc-500">Toward {leg.headsign}</p>}
-              <p className="text-xs text-zinc-500">
-                {formatDuration(leg.durationSec)}
-                {leg.distanceM != null && leg.mode === "WALK"
-                  ? ` · ${Math.round(leg.distanceM)} m`
-                  : ""}
-              </p>
-            </div>
+          <li key={`${leg.fromName}-${leg.toName}-${i}`} className="flex items-center gap-2">
+            {i > 0 && <span className="text-zinc-600" aria-hidden>→</span>}
+            {leg.mode === "WALK" ? (
+              <span className="text-zinc-400">🚶 {formatDuration(leg.durationSec)}</span>
+            ) : (
+              <span className="inline-flex items-center gap-2">
+                <span
+                  className="rounded-md px-2 py-0.5 text-xs font-bold text-black"
+                  style={getRouteBadgeStyle(leg.routeColor, leg.routeTextColor)}
+                >
+                  {leg.routeShortName ?? "Bus"}
+                </span>
+                <span className="text-zinc-400">{formatDuration(leg.durationSec)}</span>
+              </span>
+            )}
           </li>
         ))}
       </ol>
@@ -167,16 +161,13 @@ export default function PlanTripPage() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold text-zinc-50">Plan trip</h1>
-        <p className="mt-1 max-w-2xl text-sm text-zinc-400">
-          Enter where you&apos;re leaving from and where you&apos;re going. We&apos;ll suggest transit
-          and walking legs using the regional schedule.
-        </p>
-      </header>
+      <PageHeading
+        title="Plan trip"
+        subtitle="Enter where you're leaving from and where you're going. We'll suggest transit and walking legs using the regional schedule."
+      />
 
       <form onSubmit={onSubmit} className="space-y-6">
-        <div className="pgh-steel-panel space-y-4 rounded-xl p-5">
+        <div className="pgh-steel-panel space-y-4 rounded-2xl p-5 sm:p-6">
           <div className="grid gap-4 md:grid-cols-2">
             <PlaceSearchField
               label="From"
@@ -200,7 +191,7 @@ export default function PlanTripPage() {
           </button>
         </div>
 
-        <div className="pgh-steel-panel space-y-5 rounded-xl p-5">
+        <div className="pgh-steel-panel space-y-5 rounded-2xl p-5 sm:p-6">
           <PlanOptionGroup
             legend="When"
             name="timeMode"
@@ -253,26 +244,27 @@ export default function PlanTripPage() {
         <button
           type="submit"
           disabled={loading}
-          className="pgh-btn-primary rounded-lg px-5 py-2.5 text-sm disabled:opacity-60"
+          className="pgh-btn-primary rounded-full px-8 py-3 text-sm disabled:opacity-60"
         >
           {loading ? "Planning…" : "Find routes"}
         </button>
       </form>
 
       {error && (
-        <p className="rounded-lg border border-amber-900/50 bg-amber-950/30 p-4 text-sm text-amber-100">
-          {error}
-          {error.includes("503") || error.toLowerCase().includes("not configured") ? (
-            <>
-              {" "}
-              Trip planning needs OpenTripPlanner — see{" "}
-              <Link href="/" className="text-[#FFB612] hover:underline">
-                README
-              </Link>{" "}
-              for setup.
-            </>
-          ) : null}
-        </p>
+        <div className="rounded-2xl border border-amber-900/50 bg-amber-950/30 p-4 text-sm text-amber-100">
+          <p>{error.replace(/^API \/api\/v1\/plan\?[^ ]+ failed: /, "")}</p>
+          {(error.includes("503") ||
+            error.toLowerCase().includes("not configured") ||
+            error.toLowerCase().includes("not reachable") ||
+            error.includes("otp:up")) && (
+            <p className="mt-2 text-amber-200/90">
+              One-time setup:{" "}
+              <code className="text-amber-100">pnpm otp:fetch-gtfs && pnpm otp:build && pnpm otp:up</code>
+              . Ensure <code className="text-amber-100">OTP_BASE_URL=http://127.0.0.1:8080</code> in{" "}
+              <code className="text-amber-100">.env</code>, then restart the API.
+            </p>
+          )}
+        </div>
       )}
 
       {plannerNote && itineraries.length === 0 && (
@@ -283,8 +275,8 @@ export default function PlanTripPage() {
 
       {from && to && (
         <section aria-label="Trip map">
-          <h2 className="mb-2 text-lg font-medium text-zinc-100">Map</h2>
           <PlanTripMap
+            heading="Map"
             from={{ lat: from.lat, lon: from.lon, label: from.displayName }}
             to={{ lat: to.lat, lon: to.lon, label: to.displayName }}
             itinerary={itineraries[selectedItinerary] ?? null}

@@ -6,12 +6,10 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PlanOptionGroup } from "@/components/plan-option-group";
 import { getApi } from "@/lib/api";
+import { MAP_STYLE } from "@/lib/map-style";
 
 const PITTSBURGH: [number, number] = [-79.9959, 40.4406];
-const MAP_STYLE =
-  process.env.NEXT_PUBLIC_MAP_STYLE ?? "https://tiles.openfreemap.org/styles/liberty";
 
 const ROUTES_SOURCE_ID = "routes-overview";
 const STOPS_SOURCE_ID = "routes-overview-stops";
@@ -25,7 +23,6 @@ type Props = {
   selectedRouteId: string | null;
   onSelectedRouteIdChange: (routeId: string | null) => void;
   mapMode: MapMode;
-  onMapModeChange: (mode: MapMode) => void;
 };
 
 function routeLineColor(routeColor: string | null | undefined): string {
@@ -92,7 +89,6 @@ export function RoutesOverviewMap({
   selectedRouteId,
   onSelectedRouteIdChange,
   mapMode,
-  onMapModeChange,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -340,43 +336,27 @@ export function RoutesOverviewMap({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <PlanOptionGroup
-          legend="Map routes"
-          name="routes-map-mode"
-          value={mapMode}
-          onChange={onMapModeChange}
-          options={[
-            { id: "all", label: "All routes" },
-            { id: "live", label: "Live only" },
-          ]}
-        />
-        <p className="text-xs text-zinc-500 max-w-sm">
-          {selectedRouteId ? (
-            <>
-              Selected{" "}
-              <span className="font-semibold text-zinc-300">
-                {selectedMeta?.routeShortName ?? selectedRouteId}
-              </span>
-              — click the line again to show all.{" "}
-              <Link
-                href={`/routes/${encodeURIComponent(selectedRouteId)}`}
-                className="text-[#FFB612] hover:underline"
-              >
-                Route detail
-              </Link>
-              {busCount > 0 && (
-                <span className="text-zinc-400">
-                  {" "}
-                  · {busCount} {busCount === 1 ? "bus" : "buses"} live
-                </span>
-              )}
-            </>
-          ) : (
-            "Click a route line to focus it, show stops, and live buses."
+      {selectedRouteId && (
+        <p className="text-xs text-zinc-500">
+          Selected{" "}
+          <span className="font-semibold text-zinc-300">
+            {selectedMeta?.routeShortName ?? selectedRouteId}
+          </span>
+          — click the line again to show all.{" "}
+          <Link
+            href={`/routes/${encodeURIComponent(selectedRouteId)}`}
+            className="text-pgh-gold hover:underline"
+          >
+            Route detail
+          </Link>
+          {busCount > 0 && (
+            <span className="text-zinc-400">
+              {" "}
+              · {busCount} {busCount === 1 ? "bus" : "buses"} live
+            </span>
           )}
         </p>
-      </div>
+      )}
 
       {mapMode === "live" && !selectedRouteId && visibleShapes.length === 0 && (
         <p className="text-sm text-zinc-500">No live routes right now — switch to All routes or check again soon.</p>

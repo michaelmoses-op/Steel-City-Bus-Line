@@ -312,19 +312,18 @@ export function createV1Routes(deps: V1Deps) {
       });
     } catch (err) {
       console.error("[api] plan failed", err);
-      const refused =
-        err instanceof Error &&
-        "cause" in err &&
-        err.cause instanceof AggregateError &&
-        err.cause.errors.some(
-          (e) => e instanceof Error && "code" in e && e.code === "ECONNREFUSED",
-        );
-      const message = refused
-        ? "Trip planner is not reachable. Run pnpm otp:up and ensure OTP is listening on OTP_BASE_URL."
-        : err instanceof Error
-          ? err.message
-          : "Trip planning failed";
-      return c.json({ error: message }, 502);
+      const message =
+        err instanceof Error ? err.message : "Trip planning failed";
+      const unreachable = /not reachable|ECONNREFUSED|fetch failed/i.test(message);
+      return c.json(
+        {
+          error: message,
+          hint: unreachable
+            ? "Set OTP_BASE_URL in .env and run: pnpm otp:fetch-gtfs && pnpm otp:build && pnpm otp:up"
+            : undefined,
+        },
+        502,
+      );
     }
   });
 

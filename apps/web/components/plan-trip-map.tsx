@@ -5,10 +5,10 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getApi } from "@/lib/api";
+import { MAP_STYLE } from "@/lib/map-style";
+import { PlanTripMapLegend } from "@/components/plan-trip-map-legend";
 
 const PITTSBURGH: [number, number] = [-79.9959, 40.4406];
-const MAP_STYLE =
-  process.env.NEXT_PUBLIC_MAP_STYLE ?? "https://tiles.openfreemap.org/styles/liberty";
 
 const LEGS_SOURCE_ID = "plan-legs";
 const VEHICLE_SOURCE_ID = "plan-vehicles";
@@ -55,6 +55,7 @@ type Props = {
   from: Place;
   to: Place;
   itinerary: TripItinerary | null;
+  heading?: string;
   className?: string;
 };
 
@@ -109,7 +110,7 @@ function collectBounds(
   );
 }
 
-export function PlanTripMap({ from, to, itinerary, className }: Props) {
+export function PlanTripMap({ from, to, itinerary, heading, className }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const fromMarkerRef = useRef<maplibregl.Marker | null>(null);
@@ -314,34 +315,14 @@ export function PlanTripMap({ from, to, itinerary, className }: Props) {
 
   return (
     <div className={className}>
-      <p className="mb-2 text-sm text-zinc-400">
-        <span className="mr-3 inline-flex items-center gap-1">
-          <span className="inline-block h-2 w-2 rounded-full bg-[#FFB612]" /> From
-        </span>
-        <span className="mr-3 inline-flex items-center gap-1">
-          <span className="inline-block h-2 w-2 rounded-full bg-zinc-100" /> To
-        </span>
-        {itinerary && (
-          <>
-            <span className="inline-flex items-center gap-1">
-              <span className="inline-block h-0.5 w-4 bg-[#FFB612]" /> Bus
-              <span className="ml-2 inline-block h-0.5 w-4 border-b border-dashed border-zinc-400" /> Walk
-            </span>
-            {showLiveBuses && (
-              <span className="ml-3 inline-flex items-center gap-1">
-                <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#FFB612] ring-2 ring-black" /> Live
-                {liveBusCount > 0 ? (
-                  <span className="text-zinc-500">
-                    · {liveBusCount} {liveBusCount === 1 ? "bus" : "buses"} on your routes
-                  </span>
-                ) : (
-                  <span className="text-zinc-500">· no buses on map for these routes yet</span>
-                )}
-              </span>
-            )}
-          </>
-        )}
-      </p>
+      <div className="mb-3 space-y-2.5">
+        {heading && <h2 className="text-lg font-semibold leading-none text-zinc-100">{heading}</h2>}
+        <PlanTripMapLegend
+          showRouteLegs={Boolean(itinerary)}
+          showLive={showLiveBuses}
+          liveBusCount={liveBusCount}
+        />
+      </div>
       {mapError && (
         <p className="mb-2 text-sm text-amber-200/90">{mapError}</p>
       )}

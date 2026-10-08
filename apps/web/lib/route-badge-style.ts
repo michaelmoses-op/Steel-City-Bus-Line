@@ -6,7 +6,7 @@ export function getRouteBadgeStyle(
   const bg = routeColor?.replace(/^#/, "") ?? "";
   const fg = routeTextColor?.replace(/^#/, "") ?? "";
   return {
-    backgroundColor: bg ? `#${bg}` : "#FFB612",
+    backgroundColor: bg ? `#${bg}` : "#FFB81C",
     color: fg ? `#${fg}` : "#0a0a0a",
   };
 }

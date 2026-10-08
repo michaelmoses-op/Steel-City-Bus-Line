@@ -6,10 +6,9 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getApi } from "@/lib/api";
+import { MAP_STYLE } from "@/lib/map-style";
 
 const PITTSBURGH: [number, number] = [-79.9959, 40.4406];
-const MAP_STYLE =
-  process.env.NEXT_PUBLIC_MAP_STYLE ?? "https://tiles.openfreemap.org/styles/liberty";
 
 const VEHICLE_SOURCE_ID = "vehicles";
 const ROUTE_SHAPE_SOURCE_ID = "route-shape";

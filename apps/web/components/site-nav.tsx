@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogoMark } from "./logo";
+import { BrandLockup } from "./brand-lockup";
 
 const links = [
   { href: "/", label: "Home" },
@@ -15,10 +15,10 @@ const links = [
 ];
 
 function navLinkClass(active: boolean): string {
-  return `block rounded-md px-3 py-2 transition ${
+  return `block rounded-full px-4 py-2 text-sm font-semibold transition ${
     active
-      ? "bg-[#FFB612] font-semibold text-black"
-      : "text-zinc-300 hover:bg-zinc-800 hover:text-white"
+      ? "bg-pgh-gold text-black shadow-[0_2px_0_#000]"
+      : "text-zinc-200 hover:bg-zinc-900 hover:text-white"
   }`;
 }
 
@@ -40,24 +40,21 @@ export function SiteNav() {
   }, [menuOpen]);
 
   return (
-    <header className="sticky top-0 z-50">
-      <div className="pgh-checkered h-1.5 w-full" aria-hidden />
-      <nav className="border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-md" aria-label="Main">
+    <header className="sticky top-0 z-50 bg-black">
+      <div className="pgh-checkered h-2 w-full" aria-hidden />
+      <nav className="border-b border-zinc-900 bg-black/95 backdrop-blur-md" aria-label="Main">
         <div className="mx-auto max-w-6xl px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-            <Link href="/" className="flex min-w-0 items-center gap-2.5">
-              <LogoMark className="h-10 w-10 shrink-0" />
-              <div className="leading-tight">
-                <span className="block text-sm font-bold tracking-wide text-[#FFB612]">
-                  STEEL CITY
-                </span>
-                <span className="block text-xs font-medium text-zinc-400">Bus Tracker</span>
-              </div>
+            <Link
+              href="/"
+              className="inline-flex min-w-0 shrink items-center rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pgh-gold"
+            >
+              <BrandLockup markClassName="h-10 w-10 sm:h-11 sm:w-11" />
             </Link>
 
             <button
               type="button"
-              className="inline-flex shrink-0 items-center justify-center rounded-md border border-zinc-700 px-3 py-2 text-sm font-medium text-zinc-200 hover:bg-zinc-800 lg:hidden"
+              className="inline-flex shrink-0 items-center justify-center rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-200 hover:bg-zinc-900 lg:hidden"
               aria-expanded={menuOpen}
               aria-controls="site-nav-links"
               onClick={() => setMenuOpen((open) => !open)}
@@ -69,9 +66,12 @@ export function SiteNav() {
               id="site-nav-links"
               className={`w-full basis-full lg:ml-auto lg:w-auto lg:basis-auto ${menuOpen ? "max-lg:block" : "max-lg:hidden"} lg:block`}
             >
-              <ul className="flex flex-col gap-0.5 text-sm max-lg:border-t max-lg:border-zinc-800/80 max-lg:pt-2 lg:flex-row lg:gap-1 lg:border-0 lg:pt-0">
+              <ul className="flex flex-col gap-1 text-sm max-lg:border-t max-lg:border-zinc-800 max-lg:pt-3 lg:flex-row lg:items-center lg:gap-0.5 lg:border-0 lg:pt-0">
                 {links.map((l) => {
-                  const active = pathname === l.href || pathname.startsWith(`${l.href}/`);
+                  const active =
+                    l.href === "/"
+                      ? pathname === "/"
+                      : pathname === l.href || pathname.startsWith(`${l.href}/`);
                   return (
                     <li key={l.href}>
                       <Link

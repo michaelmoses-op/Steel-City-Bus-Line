@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { LiveMap } from "@/components/live-map";
+import { PageHeading } from "@/components/page-heading";
 import { RouteAlertsPanel } from "@/components/route-alerts-panel";
 
 export default function MapPage() {
@@ -10,16 +11,20 @@ export default function MapPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-zinc-50">Live map</h1>
-      <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-        Positions refresh over SSE. Stale GPS (&gt;2 min) is removed server-side.
-        {route && (
+      <PageHeading
+        title="Live map"
+        subtitle={
           <>
-            {" "}
-            Showing route <strong className="text-[#FFB612]">{route}</strong> only.
+            Positions refresh over SSE. Stale GPS (&gt;2 min) is removed server-side.
+            {route && (
+              <>
+                {" "}
+                Showing route <strong className="text-pgh-gold">{route}</strong> only.
+              </>
+            )}
           </>
-        )}
-      </p>
+        }
+      />
       {route && <RouteAlertsPanel routeId={route} className="mt-4" />}
 
       <div className="mt-6">

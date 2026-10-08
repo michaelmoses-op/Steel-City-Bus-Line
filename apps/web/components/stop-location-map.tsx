@@ -4,8 +4,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 
-const MAP_STYLE =
-  process.env.NEXT_PUBLIC_MAP_STYLE ?? "https://tiles.openfreemap.org/styles/liberty";
+import { MAP_STYLE } from "@/lib/map-style";
 
 type Props = {
   lat: number;

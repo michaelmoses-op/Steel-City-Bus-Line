@@ -1,6 +1,6 @@
-import type { HealthResponse } from "@steel-city/shared";
+import type { HealthResponse, RouteSummary } from "@steel-city/shared";
 import Link from "next/link";
-import { LogoMark } from "@/components/logo";
+import { RouteListRow } from "@/components/route-list-row";
 import { getApi } from "@/lib/api";
 
 export default async function Home() {
@@ -8,6 +8,7 @@ export default async function Home() {
   let routeCount: number | null = null;
   let vehicleCount: number | null = null;
   let alertCount: number | null = null;
+  let liveRoutes: { route: RouteSummary; buses: number }[] = [];
   let error: string | null = null;
 
   try {
@@ -15,10 +16,22 @@ export default async function Home() {
     if (health.database) {
       const routes = await getApi().getRoutes();
       routeCount = routes.length;
+      if (health.redis) {
+        const { vehicles } = await getApi().getVehicles();
+        vehicleCount = vehicles.length;
+        const counts = new Map<string, number>();
+        for (const v of vehicles) {
+          if (!v.routeId) continue;
+          counts.set(v.routeId, (counts.get(v.routeId) ?? 0) + 1);
+        }
+        liveRoutes = routes
+          .filter((r) => (counts.get(r.routeId) ?? 0) > 0)
+          .map((r) => ({ route: r, buses: counts.get(r.routeId) ?? 0 }))
+          .sort((a, b) => b.buses - a.buses)
+          .slice(0, 6);
+      }
     }
     if (health.redis) {
-      const { vehicles } = await getApi().getVehicles();
-      vehicleCount = vehicles.length;
       const { alerts } = await getApi().getAlerts();
       alertCount = alerts.length;
     }
@@ -27,40 +40,60 @@ export default async function Home() {
   }
 
   return (
-    <div className="space-y-10">
-      <header className="pgh-steel-panel relative overflow-hidden rounded-2xl p-8">
-        <div className="pgh-checkered absolute inset-x-0 top-0 h-2" aria-hidden />
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-          <LogoMark className="h-16 w-16 shrink-0" />
-          <div>
-            <p className="text-xs font-bold tracking-[0.2em] text-[#FFB612]">PITTSBURGH & ALLEGHENY COUNTY</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight text-zinc-50">
-              Know where your bus is
-            </h1>
-            <p className="mt-2 max-w-2xl text-zinc-400">
-              Live buses, routes, stops, and alerts — built on PRT open data
-            </p>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-12">
+      <section>
+        <p className="pgh-kicker">Pittsburgh &amp; Allegheny County</p>
+        <h1 className="pgh-page-title mt-3 max-w-xl">
+          Know where
+          <br />
+          your bus is
+        </h1>
+        <p className="mt-4 max-w-lg text-sm text-zinc-400">
+          Live buses, routes, stops, and alerts — built on PRT open data.
+        </p>
+      </section>
 
       {error && (
-        <p className="rounded-lg border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-300">
-          {error}. Start the stack with <code className="text-red-200">pnpm dev</code> and ensure
+        <p className="rounded-2xl border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-300">
+          {error}. Start the stack with <code className="text-red-200">make dev</code> and ensure
           Docker (Postgres + Redis) is running.
         </p>
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Routes" value={routeCount} href="/routes" />
-        <StatCard label="Live buses" value={vehicleCount} href="/map" />
-        <StatCard label="Active alerts" value={alertCount} href="/alerts" />
+        <StatCard label="Live" value={vehicleCount} href="/map" highlight />
+        <StatCard label="Alerts" value={alertCount} href="/alerts" />
       </div>
 
+      {liveRoutes.length > 0 && (
+        <section aria-labelledby="home-live-heading">
+          <h2 id="home-live-heading" className="pgh-section-label mb-3">
+            Live now · {liveRoutes.length} routes
+          </h2>
+          <ul className="divide-y divide-zinc-800 overflow-hidden rounded-2xl border border-zinc-800 bg-pgh-panel">
+            {liveRoutes.map(({ route, buses }) => (
+              <RouteListRow key={route.routeId} route={route} liveBusCount={buses} />
+            ))}
+          </ul>
+          <p className="mt-3 text-sm">
+            <Link href="/routes" className="font-semibold text-pgh-gold hover:underline">
+              View all routes →
+            </Link>
+          </p>
+        </section>
+      )}
+
       <div className="flex flex-wrap gap-3">
-        <PrimaryLink href="/map">Open live map</PrimaryLink>
-        <SecondaryLink href="/routes">Browse routes</SecondaryLink>
-        <SecondaryLink href="/stops">Find stops</SecondaryLink>
+        <Link href="/map" className="pgh-btn-primary rounded-full px-6 py-2.5 text-sm">
+          Open live map
+        </Link>
+        <Link
+          href="/stops"
+          className="rounded-full border border-zinc-600 px-6 py-2.5 text-sm font-semibold text-zinc-200 hover:border-pgh-gold hover:text-pgh-gold"
+        >
+          Nearby stops
+        </Link>
       </div>
     </div>
   );
@@ -70,37 +103,20 @@ function StatCard({
   label,
   value,
   href,
+  highlight = false,
 }: {
   label: string;
   value: number | null;
   href: string;
+  highlight?: boolean;
 }) {
-  return (
-    <Link href={href} className="pgh-steel-panel group overflow-hidden rounded-xl transition hover:border-[#FFB612]/50">
-      <div className="pgh-checkered-subtle h-1.5 opacity-80 group-hover:opacity-100" aria-hidden />
-      <div className="p-5">
-        <p className="text-sm font-medium uppercase tracking-wide text-zinc-500">{label}</p>
-        <p className="mt-1 text-3xl font-bold text-[#FFB612]">{value === null ? "—" : value}</p>
-      </div>
-    </Link>
-  );
-}
-
-function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link href={href} className="pgh-btn-primary rounded-lg px-5 py-2.5 text-sm">
-      {children}
-    </Link>
-  );
-}
-
-function SecondaryLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link
       href={href}
-      className="rounded-lg border border-zinc-600 px-5 py-2.5 text-sm text-zinc-200 hover:border-[#FFB612] hover:text-[#FFB612]"
+      className={`pgh-stat-card block ${highlight ? "pgh-stat-card--live" : ""}`}
     >
-      {children}
+      <p className="pgh-stat-label">{label}</p>
+      <p className="pgh-stat-value">{value === null ? "—" : value}</p>
     </Link>
   );
 }

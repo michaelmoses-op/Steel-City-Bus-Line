@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --pittsburgh-gold: #ffb612;
-  --pittsburgh-black: #0a0a0a;
+  --pittsburgh-gold: #ffb81c;
+  --pittsburgh-black: #000000;
+  --pittsburgh-panel: #141414;
   --pittsburgh-steel: #3f3f46;
-  --pittsburgh-smoke: #18181b;
+  --pittsburgh-smoke: #1a1a1a;
   --background: var(--pittsburgh-black);
   --foreground: #f4f4f5;
 }
@@ -14,65 +15,207 @@
   --color-foreground: var(--foreground);
   --color-pgh-gold: var(--pittsburgh-gold);
   --color-pgh-steel: var(--pittsburgh-steel);
-  --font-sans: var(--font-geist-sans);
+  --color-pgh-panel: var(--pittsburgh-panel);
+  --font-sans: var(--font-barlow);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-bebas);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-barlow), system-ui, sans-serif;
 }
 
-/* Black & gold checkered band (Pittsburgh racing / civic motif) */
+.pgh-page-title {
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: clamp(2.5rem, 6vw, 3.75rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fafafa;
+}
+
+.pgh-kicker {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--pittsburgh-gold);
+}
+
+.pgh-nav-title {
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pittsburgh-gold);
+}
+
+@media (min-width: 640px) {
+  .pgh-nav-title {
+    font-size: 1.5rem;
+  }
+}
+
+.pgh-nav-subtitle {
+  font-family: var(--font-barlow), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #d4d4d8;
+}
+
+@media (min-width: 640px) {
+  .pgh-nav-subtitle {
+    font-size: 0.75rem;
+  }
+}
+
+.pgh-section-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pittsburgh-gold);
+}
+
+.pgh-section-label::before {
+  content: "";
+  display: inline-block;
+  height: 0.45rem;
+  width: 0.45rem;
+  border-radius: 9999px;
+  background: var(--pittsburgh-gold);
+}
+
+/* Hazard stripe — two-layer 45° tiles (avoids hairline gaps between squares) */
 .pgh-checkered {
-  background-color: #000;
+  background-color: var(--pittsburgh-gold);
   background-image:
-    linear-gradient(45deg, var(--pittsburgh-gold) 25%, transparent 25%),
-    linear-gradient(-45deg, var(--pittsburgh-gold) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, var(--pittsburgh-gold) 75%),
-    linear-gradient(-45deg, transparent 75%, var(--pittsburgh-gold) 75%);
+    linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000),
+    linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000);
   background-size: 12px 12px;
-  background-position:
-    0 0,
-    0 6px,
-    6px -6px,
-    -6px 0;
+  background-position: 0 0, 6px 6px;
 }
 
 .pgh-checkered-subtle {
-  background-color: #18181b;
+  background-color: #000;
   background-image:
-    linear-gradient(45deg, rgb(255 182 18 / 0.35) 25%, transparent 25%),
-    linear-gradient(-45deg, rgb(255 182 18 / 0.35) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, rgb(255 182 18 / 0.35) 75%),
-    linear-gradient(-45deg, transparent 75%, rgb(255 182 18 / 0.35) 75%);
+    linear-gradient(
+      45deg,
+      rgb(255 184 28 / 0.38) 25%,
+      transparent 25%,
+      transparent 75%,
+      rgb(255 184 28 / 0.38) 75%,
+      rgb(255 184 28 / 0.38)
+    ),
+    linear-gradient(
+      45deg,
+      rgb(255 184 28 / 0.38) 25%,
+      transparent 25%,
+      transparent 75%,
+      rgb(255 184 28 / 0.38) 75%,
+      rgb(255 184 28 / 0.38)
+    );
   background-size: 10px 10px;
-  background-position:
-    0 0,
-    0 5px,
-    5px -5px,
-    -5px 0;
+  background-position: 0 0, 5px 5px;
+}
+
+/* Dashed row of gold squares (signage motif) */
+.pgh-dash-squares {
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--pittsburgh-gold) 0,
+    var(--pittsburgh-gold) 6px,
+    transparent 6px,
+    transparent 10px
+  );
+  background-size: 10px 6px;
+  background-repeat: repeat-x;
+  background-position: left center;
 }
 
 .pgh-steel-panel {
-  background: linear-gradient(165deg, #27272a 0%, #18181b 45%, #09090b 100%);
-  border: 1px solid #3f3f46;
+  background: linear-gradient(165deg, #1c1c1c 0%, var(--pittsburgh-panel) 40%, #0a0a0a 100%);
+  border: 1px solid #2a2a2a;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.04),
-    0 4px 24px rgb(0 0 0 / 0.35);
+    inset 0 1px 0 rgb(255 255 255 / 0.03),
+    0 8px 32px rgb(0 0 0 / 0.45);
+}
+
+.pgh-input {
+  border: 1px solid #3f3f46;
+  background: #0a0a0a;
+  color: #f4f4f5;
+  border-radius: 9999px;
+}
+
+.pgh-input:focus {
+  outline: 2px solid rgb(255 184 28 / 0.45);
+  outline-offset: 2px;
 }
 
 .pgh-btn-primary {
-  background: linear-gradient(180deg, #ffc93d 0%, var(--pittsburgh-gold) 100%);
-  color: #0a0a0a;
-  font-weight: 600;
-  border: 1px solid #000;
-  box-shadow: 0 2px 0 #000;
+  background: var(--pittsburgh-gold);
+  color: #000;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 2px solid #000;
+  box-shadow: 0 3px 0 #000;
 }
 
 .pgh-btn-primary:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.06);
+}
+
+.pgh-stat-card {
+  border-radius: 1rem;
+  border: 1px solid #2a2a2a;
+  background: var(--pittsburgh-panel);
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.15s ease;
+}
+
+.pgh-stat-card:hover {
+  border-color: rgb(255 184 28 / 0.35);
+}
+
+.pgh-stat-card--live {
+  background: var(--pittsburgh-gold);
+  border-color: #000;
+  color: #000;
+}
+
+.pgh-stat-card--live .pgh-stat-value {
+  color: #000;
+}
+
+.pgh-stat-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+
+.pgh-stat-card--live .pgh-stat-label {
+  color: rgb(0 0 0 / 0.65);
+}
+
+.pgh-stat-value {
+  margin-top: 0.35rem;
+  font-family: var(--font-bebas), system-ui, sans-serif;
+  font-size: 2.75rem;
+  line-height: 1;
+  color: var(--pittsburgh-gold);
 }
 
 .pgh-link-gold {
@@ -102,3 +245,23 @@ body {
   border-radius: 8px;
   border: 2px solid #18181b;
 }
+
+.pgh-alert-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid #2a2a2a;
+  background: var(--pittsburgh-panel);
+  padding: 1.25rem 1.5rem;
+}
+
+.pgh-alert-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--pittsburgh-gold);
+}
+

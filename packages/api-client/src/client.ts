@@ -37,7 +37,16 @@ export function createApiClient(options: ApiClientOptions) {
   async function getJson<T>(path: string, schema: { parse: (data: unknown) => T }): Promise<T> {
     const res = await fetchFn(`${base}${path}`);
     if (!res.ok) {
-      throw new Error(`API ${path} failed: ${res.status} ${res.statusText}`);
+      let detail = `${res.status} ${res.statusText}`;
+      try {
+        const errBody = (await res.json()) as { error?: string; hint?: string };
+        if (errBody.error) {
+          detail = errBody.hint ? `${errBody.error} ${errBody.hint}` : errBody.error;
+        }
+      } catch {
+        /* not JSON */
+      }
+      throw new Error(`API ${path} failed: ${detail}`);
     }
     const data: unknown = await res.json();
     return schema.parse(data);

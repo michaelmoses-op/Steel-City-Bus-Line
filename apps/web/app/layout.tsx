@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Barlow, Bebas_Neue, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { SiteNav } from "@/components/site-nav";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bebas = Bebas_Neue({
+  weight: "400",
+  variable: "--font-bebas",
+  subsets: ["latin"],
+});
+
+const barlow = Barlow({
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-barlow",
   subsets: ["latin"],
 });
 
@@ -17,10 +24,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Steel City Bus Tracker",
   description: "Pittsburgh transit routes, live bus tracking, and trip planning",
-  icons: {
-    icon: "/logo.jpg",
-    apple: "/logo.jpg",
-  },
 };
 
 export default function RootLayout({
@@ -31,11 +34,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[#0a0a0a] text-zinc-100 antialiased`}
+        className={`${bebas.variable} ${barlow.variable} ${geistMono.variable} min-h-screen bg-black text-zinc-100 antialiased`}
       >
         <Providers>
           <SiteNav />
-          <div className="mx-auto max-w-6xl px-4 py-8">{children}</div>
+          <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">{children}</div>
         </Providers>
       </body>
     </html>

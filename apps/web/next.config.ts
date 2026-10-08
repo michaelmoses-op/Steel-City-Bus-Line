@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
         source: "/api/v1/:path*",
         destination: `${apiOrigin}/api/v1/:path*`,
       },
+      { source: "/favicon.ico", destination: "/branding/favicon-32.png" },
     ];
   },
 };

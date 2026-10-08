@@ -8,6 +8,8 @@ type Props<T extends string> = {
   value: T;
   onChange: (value: T) => void;
   options: Option<T>[];
+  /** Hide visible legend (keep for screen readers via radiogroup label). */
+  hideLegend?: boolean;
 };
 
 export function PlanOptionGroup<T extends string>({
@@ -16,12 +18,13 @@ export function PlanOptionGroup<T extends string>({
   value,
   onChange,
   options,
+  hideLegend = false,
 }: Props<T>) {
   return (
     <div>
-      <p className="mb-2 text-sm font-medium text-zinc-300">{legend}</p>
+      {!hideLegend && <p className="mb-2 text-sm font-medium text-zinc-300">{legend}</p>}
       <div
-        className="inline-flex flex-wrap gap-1 rounded-lg border border-zinc-600/80 bg-zinc-950/80 p-1"
+        className="inline-flex flex-wrap gap-1 rounded-full border border-zinc-700 bg-zinc-900/90 p-1"
         role="radiogroup"
         aria-label={legend}
       >
@@ -35,10 +38,10 @@ export function PlanOptionGroup<T extends string>({
               aria-checked={selected}
               name={name}
               onClick={() => onChange(opt.id)}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition ${
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                 selected
-                  ? "bg-[#FFB612] text-black shadow-sm"
-                  : "text-zinc-400 hover:bg-zinc-800/80 hover:text-zinc-200"
+                  ? "bg-pgh-gold text-black shadow-[0_2px_0_#000]"
+                  : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
               }`}
             >
               {opt.label}

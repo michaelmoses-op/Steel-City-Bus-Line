@@ -55,7 +55,7 @@ export function PlaceSearchField({ label, value, onChange, placeholder }: Props)
 
   return (
     <div className="relative">
-      <label htmlFor={inputId} className="mb-1 block text-sm font-medium text-zinc-300">
+      <label htmlFor={inputId} className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-zinc-500">
         {label}
       </label>
       <input
@@ -71,7 +71,7 @@ export function PlaceSearchField({ label, value, onChange, placeholder }: Props)
           setText(e.target.value);
           onChange(null);
         }}
-        className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
+        className="pgh-input w-full px-4 py-3 text-sm"
       />
       {loading && <p className="mt-1 text-xs text-zinc-500">Searching…</p>}
       {suggestions.length > 0 && (

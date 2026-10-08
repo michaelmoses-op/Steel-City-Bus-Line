@@ -226,8 +226,23 @@ export async function planTripWithOtp(
   }
 
   const url = `${root}/otp/routers/default/plan?${params}`;
-  const res = await fetch(url);
-  const body = (await res.json()) as OtpPlanResponse;
+  let res: Response;
+  try {
+    res = await fetch(url, { signal: AbortSignal.timeout(90_000) });
+  } catch {
+    throw new Error(
+      "Trip planner is not reachable. Start OpenTripPlanner (pnpm otp:up; see README for otp:build).",
+    );
+  }
+
+  let body: OtpPlanResponse;
+  try {
+    body = (await res.json()) as OtpPlanResponse;
+  } catch {
+    throw new Error(
+      `Trip planner returned an invalid response (${res.status}). Check that OTP is running at ${root}.`,
+    );
+  }
 
   if (!res.ok) {
     const msg = body.error?.msg ?? body.error?.message ?? res.statusText;
