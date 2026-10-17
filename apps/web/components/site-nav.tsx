@@ -3,16 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { isTripPlannerEnabled } from "@/lib/features";
 import { BrandLockup } from "./brand-lockup";
 
-const links = [
+const allLinks = [
   { href: "/", label: "Home" },
-  { href: "/plan", label: "Plan trip" },
+  { href: "/plan", label: "Plan trip", tripPlannerOnly: true },
   { href: "/map", label: "Live map" },
   { href: "/routes", label: "Routes" },
   { href: "/stops", label: "Stops" },
   { href: "/alerts", label: "Alerts" },
-];
+] as const;
+
+const links = allLinks.filter((l) => !("tripPlannerOnly" in l && l.tripPlannerOnly) || isTripPlannerEnabled());
 
 function navLinkClass(active: boolean): string {
   return `block rounded-full px-4 py-2 text-sm font-semibold transition ${

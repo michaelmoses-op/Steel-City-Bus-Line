@@ -74,7 +74,7 @@ Use `[x]` when done, `[ ]` when not started, `[~]` when in progress.
 
 - [x] **Plan trip** — own nav tab `/plan`; geocode + OTP proxy API; UI (leave now / depart / arrive, best vs fewest transfers). **Needs `OTP_BASE_URL` + local OTP graph.**
 - [~] Itinerary preview on map; link legs to route detail — map + leg geometry on `/plan`; route links TBD
-- [ ] Production deploy (web + API + worker + Postgres + Redis) — document host/env
+- [x] Production deploy docs + Dockerfiles (Vercel web, Railway API/worker); trip planner hidden by default
 - [ ] CI: `pnpm typecheck` / `lint` on PRs
 - [ ] Unit tests for `transit-core` arrivals + alert filtering
 - [ ] Optional: map alert banner when not filtering by route; trip headsign on arrivals
@@ -91,11 +91,11 @@ Use `[x]` when done, `[ ]` when not started, `[~]` when in progress.
 
 **Phase:** 4b (Web deploy polish — **no mobile yet**)
 
-**Active goal:** Polish web for initial deployment; trip planner tab added (wire up OpenTripPlanner for live results).
+**Active goal:** Initial production deploy (Vercel + Railway); trip planner/OTP off unless feature flags enabled.
 
 **Blockers:** None documented. Ensure `.env` includes `PRT_GTFSRT_TRIPS_URL` for live stop arrivals.
 
-**Last updated:** 2026-10-02
+**Last updated:** 2026-10-17
 
 ---
 
@@ -105,6 +105,7 @@ Append a short entry after each meaningful agent session (newest first).
 
 | Date | Author | Summary |
 |------|--------|---------|
+| 2026-10-17 | — | Deploy: API/worker Dockerfiles, Vercel config, docs/DEPLOY.md; hide Plan trip via feature flags |
 | 2026-10-02 | — | Trip updates ingest; stop arrivals API/UI; route alerts on route/map; routes live section; map SSE/CORS fix; mobile nav; AGENTS Phase 4b |
 | 2026-10-01 | — | Phase 3–4: GTFS-RT/Redis, live API, MapLibre web (map, routes, stops, alerts) |
 | 2026-10-01 | — | Phase 2: PostGIS docker (host **5433**), Drizzle, GTFS import, routes/stops API |

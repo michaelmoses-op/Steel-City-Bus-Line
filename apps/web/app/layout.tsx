@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Steel City Bus Tracker",
-  description: "Pittsburgh transit routes, live bus tracking, and trip planning",
+  description: "Pittsburgh transit routes, live bus tracking, stops, and alerts",
 };
 
 export default function RootLayout({

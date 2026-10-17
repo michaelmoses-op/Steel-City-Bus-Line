@@ -17,6 +17,10 @@ import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { z } from "zod";
 
+function tripPlannerEnabled(): boolean {
+  return process.env.ENABLE_TRIP_PLANNER === "true";
+}
+
 const nearbyQuerySchema = z.object({
   lat: z.coerce.number().min(-90).max(90),
   lon: z.coerce.number().min(-180).max(180),
@@ -207,6 +211,9 @@ export function createV1Routes(deps: V1Deps) {
   });
 
   v1.get("/geocode", async (c) => {
+    if (!tripPlannerEnabled()) {
+      return c.json({ error: "Trip planner is disabled" }, 404);
+    }
     const q = c.req.query("q") ?? "";
     try {
       const results = await geocodePlace(q);
@@ -218,6 +225,9 @@ export function createV1Routes(deps: V1Deps) {
   });
 
   v1.get("/plan", async (c) => {
+    if (!tripPlannerEnabled()) {
+      return c.json({ error: "Trip planner is disabled" }, 404);
+    }
     const otpBase = process.env.OTP_BASE_URL;
     if (!otpBase) {
       return c.json(

@@ -1,0 +1,13 @@
+node_modules
+**/.next
+**/dist
+.git
+.env
+.env.*
+!.env.example
+infra/otp/gtfs
+infra/otp/graph.obj
+infra/otp/osm
+*.md
+.cursor
+agent-transcripts

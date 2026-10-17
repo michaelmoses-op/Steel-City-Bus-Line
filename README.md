@@ -58,9 +58,13 @@ The home page calls the API via `@steel-city/api-client` and shows JSON when the
 
 Next.js · Hono (Node) · PostgreSQL/PostGIS · Redis · Expo (mobile, later) · TypeScript monorepo (pnpm).
 
-## Trip planning (OpenTripPlanner)
+## Production deploy
 
-The **Plan trip** page uses the API → OpenTripPlanner (`OTP_BASE_URL`). One-time setup:
+Step-by-step **Vercel + Railway** (Postgres/PostGIS, Redis, API, worker; trip planner off): [docs/DEPLOY.md](./docs/DEPLOY.md).
+
+## Trip planning (OpenTripPlanner, optional / local)
+
+The **Plan trip** page is **disabled in production by default** (`ENABLE_TRIP_PLANNER` / `NEXT_PUBLIC_ENABLE_TRIP_PLANNER`). For local dev, set both to `true` and use the API → OpenTripPlanner (`OTP_BASE_URL`). One-time setup:
 
 ```bash
 # From repo root (Docker Desktop running)
