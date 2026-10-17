@@ -25,32 +25,103 @@ Production layout:
 ## 1. Railway project
 
 1. Go to [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub repo** → select this repository.
-2. You will add **four services** in one project (same private network):
-   - PostGIS
-   - Redis
-   - API
-   - Worker
 
-### 1a. PostGIS (database)
+### If you see four GitHub cards (`@steel-city/api`, `web`, `worker`, `mobile`)
 
-Stock Railway Postgres may **not** include PostGIS. Use the official image:
+Railway **auto-detected the monorepo** and created one service per package. That is normal. You still **add databases separately** — they do not appear from GitHub import.
 
-1. **Add service** → **Empty service** (or **Docker image**).
-2. **Settings** → **Source**: Docker image `postgis/postgis:16-3.4`.
-3. **Variables** (service):
-   - `POSTGRES_USER=steel_city`
-   - `POSTGRES_PASSWORD=` (generate a strong password)
-   - `POSTGRES_DB=steel_city`
-4. **Volumes**: mount `/var/lib/postgresql/data` (Railway prompt when adding volume).
-5. **Networking**: generate a **public** TCP proxy only if you need external access; otherwise keep private.
-6. Build **`DATABASE_URL`** for other services (private hostname from Railway networking), e.g.  
-   `postgresql://steel_city:PASSWORD@postgis.railway.internal:5432/steel_city`  
-   (Use the exact host/port Railway shows for this service on the private network.)
+**Keep on Railway:** `@steel-city/api`, `@steel-city/worker`  
+**Remove from Railway** (use Vercel / not deployed yet): `@steel-city/web`, `@steel-city/mobile`
 
-### 1b. Redis
+1. Open **`@steel-city/web`** → **Settings** → scroll to **Danger** → **Delete service**. Repeat for **`mobile`**.
+2. Configure **api** and **worker** (Dockerfiles below). Ignore the yellow **“N Settings”** badge until source/build is set.
 
-1. **Add service** → **Database** → **Redis**, or Docker image `redis:7-alpine`.
-2. Copy **`REDIS_URL`** from the Redis service variables (often `redis://default:...@redis.railway.internal:6379`).
+**Add PostGIS + Redis** (not in the repo):
+
+- **Create** (top-right of the project, or **⌘/Ctrl+K** → “Empty service” / “Database”) — *not* on the canvas cards themselves.
+- If you do not see **Create**: click the **project name** in the top breadcrumb so you are on the **project canvas** (not inside a single service’s logs). The **+ Create** control lives on that view.
+- Pick **Empty service** (PostGIS Docker image) or **Database → Redis**. For Postgres, prefer the PostGIS image in [1a](#1a-postgis-database); Railway’s default Postgres may lack the `postgis` extension.
+
+Target **four services** when done: **PostGIS**, **Redis**, **api**, **worker** (web/mobile deleted).
+
+### 1a. PostGIS (Docker Hub — not GitHub)
+
+**Yes:** the database runs from **[Docker Hub](https://hub.docker.com/r/postgis/postgis)** image  
+`postgis/postgis:16-3.4`  
+(not from your GitHub repo). Railway’s **“Add PostgreSQL”** template often **lacks PostGIS**; this image includes it.
+
+**A. Create the service (use “Docker Image”, not a clickable search link)**
+
+Railway’s image search shows names that **link to Docker Hub** — clicking them does **not** set the source. You must **type** the image and confirm with **Enter**, then **Deploy**.
+
+1. Open your project **architecture canvas**.
+2. Top-right: **Create** (or **+ New**).
+3. Choose **Docker Image** (not “Empty service” first — that path is easy to get wrong).
+4. In the **Image name** field, **type** (do not click search results):
+
+   `postgis/postgis:16-3.4`
+
+5. Press **Enter**, then click **Deploy** (or **Add service**).
+
+Railway creates a new service and pulls from [Docker Hub `postgis/postgis`](https://hub.docker.com/r/postgis/postgis). Wait until **Deployments** shows success.
+
+**If you already made an Empty service:** open it → **Settings** → **Source** → switch to **Docker Image** → type `postgis/postgis:16-3.4` in the text field → **Enter** → **Deploy**. Do not click the Docker Hub hyperlink.
+
+**CLI alternative** (from a linked project): `railway add --image postgis/postgis:16-3.4`
+
+**C. Variables (same service → Variables tab)**
+
+Click **Variables** (top tabs on that service, next to Settings):
+
+| Name | Value |
+|------|--------|
+| `POSTGRES_USER` | `steel_city` |
+| `POSTGRES_PASSWORD` | long random password (Railway can generate) |
+| `POSTGRES_DB` | `steel_city` |
+
+Redeploy if Railway prompts you after saving variables.
+
+**D. Volume (Settings → Mount path)**
+
+1. **Settings** tab again → **Volumes** (or **Storage**).
+2. **Add volume** → mount path: `/var/lib/postgresql/data`  
+   (required so data survives redeploys).
+
+**E. `DATABASE_URL` for api + worker (private host is not on the Networking page)**
+
+On PostGIS, **Settings → Networking** usually shows only **Public** options (Generate Domain, TCP Proxy). That is normal. **Private** DNS is not listed there; it exists as the variable **`RAILWAY_PRIVATE_DOMAIN`** on the PostGIS service at runtime.
+
+1. Note the **exact service name** on the canvas card (e.g. `postgis`, `PostGIS`, or an auto name like `postgis-production-a1b2`). You need this spelling for references.
+2. On **`@steel-city/api`** → **Variables** → **+ New Variable** (or **Raw Editor**).
+3. Add **`DATABASE_URL`** with this value (replace `YOUR_POSTGIS_SERVICE_NAME` with the name from step 1 — no spaces):
+
+   ```text
+   postgresql://steel_city:${{YOUR_POSTGIS_SERVICE_NAME.POSTGRES_PASSWORD}}@${{YOUR_POSTGIS_SERVICE_NAME.RAILWAY_PRIVATE_DOMAIN}}:5432/steel_city
+   ```
+
+   Example if the card is named `postgis`:
+
+   ```text
+   postgresql://steel_city:${{postgis.POSTGRES_PASSWORD}}@${{postgis.RAILWAY_PRIVATE_DOMAIN}}:5432/steel_city
+   ```
+
+   In the UI, typing `${{` often opens a picker to choose the PostGIS service and variable.
+
+4. Add the **same** `DATABASE_URL` on **`@steel-city/worker`** (or set it once under **Project → Shared Variables**).
+
+Do **not** use **Generate Domain** or **TCP Proxy** on PostGIS unless you need to connect from your laptop; api/worker should use the reference URL above on the private network.
+
+**F. Optional rename**
+
+Service **Settings** → **General** → rename the service to `postgis` so the canvas is readable.
+
+### 1b. Redis (Railway template — not GitHub)
+
+1. Back on the **project canvas** → **Create** again.
+2. Choose **Database** → **Add Redis** (Railway-managed plugin).
+3. Click the new **Redis** service → **Variables** tab.
+4. Copy **`REDIS_URL`** (or **`REDIS_PRIVATE_URL`** if shown — prefer the URL meant for other services in the same project).
+5. Paste into **api** and **worker** variables (or project **Shared Variables**).
 
 ### 1c. API service
 

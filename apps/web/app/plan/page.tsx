@@ -1,7 +1,6 @@
 "use client";
 
 import type { GeocodeResult, TripItinerary } from "@steel-city/shared";
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { PageHeading } from "@/components/page-heading";
