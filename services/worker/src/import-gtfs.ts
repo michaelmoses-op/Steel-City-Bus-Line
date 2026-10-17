@@ -59,7 +59,7 @@ async function main(): Promise<void> {
   console.log(`[import-gtfs] stop_times: ${tables.stopTimes.length} rows`);
   console.log(`[import-gtfs] shapes: ${tables.shapes.length} rows`);
 
-  const connection = createDbConnection(databaseUrl);
+  const connection = createDbConnection(databaseUrl, { singleConnection: true });
   try {
     console.log("[import-gtfs] importing into postgres (often 5–15 min, progress below)…");
     const result = await importGtfsTables(connection.db, tables);

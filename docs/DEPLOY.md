@@ -167,24 +167,27 @@ In Railway **Project** → **Variables** → **Shared variables**, set `DATABASE
 
 ## 2. Load static GTFS (one time)
 
-After PostGIS is up and API has run migrations at least once:
+After PostGIS is up and **api** has deployed at least once (runs DB migrations).
 
-**Option A — Railway CLI** (from repo root, linked to the worker or API service):
+**Recommended — run import on Railway worker** (uses private `DATABASE_URL`; do not use `railway run` from your PC — that still hits `.railway.internal` and fails).
 
-```bash
-railway link
-railway run pnpm gtfs:import
-```
+1. Railway → **`@steel-city/api`** → **Settings** → **Deploy** → **clear** any Custom Start Command (api image does not include the worker package). Redeploy api if you changed it.
+2. Railway → **`@steel-city/worker`** → **Settings**.
+3. **Deploy** section → **Custom Start Command** (or **Start Command**).
+4. Set command to (**not** `pnpm gtfs:import` — that fails on the slim Docker image):
 
-Ensure the linked service has `DATABASE_URL` and network access to PostGIS.
+   ```text
+   pnpm --filter @steel-city/worker run import:gtfs
+   ```
 
-**Option B — Local** (Postgres reachable via public proxy or VPN):
+5. **Deploy** / **Redeploy** the **worker** (build log should show `services/worker/Dockerfile`, not `api`).
+5. **Deployments** → open the latest deploy → **View logs**. Wait until you see `[import-gtfs] done` (often 5–15 minutes).
+6. **Settings** → clear **Custom Start Command** (empty = use Dockerfile default).
+7. **Redeploy** worker so it runs the normal GTFS-RT poll loop again.
 
-```bash
-DATABASE_URL="postgresql://..." pnpm gtfs:import
-```
+**Optional — local import via TCP proxy** (only if worker method fails): enable TCP proxy on PostGIS, build `DATABASE_URL` from `RAILWAY_TCP_PROXY_DOMAIN` + `RAILWAY_TCP_PROXY_PORT`, then `pnpm gtfs:import`. Long imports may hit `ECONNRESET` over the proxy; prefer the worker method above.
 
-Verify: open API `GET /api/v1/routes` (or the web **Routes** page after Vercel is wired).
+Verify: `GET https://YOUR-API-DOMAIN/api/v1/routes` returns a JSON list.
 
 Re-run import when PRT publishes a new GTFS bundle (monthly/quarterly).
 

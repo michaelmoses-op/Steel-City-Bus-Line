@@ -11,8 +11,20 @@ export type DbConnection = {
 
 let cached: DbConnection | null = null;
 
-export function createDbConnection(connectionString: string): DbConnection {
-  const client = postgres(connectionString, { max: 10 });
+export type DbConnectionOptions = {
+  /** Long-running scripts (e.g. GTFS import): one connection, no idle timeout. */
+  singleConnection?: boolean;
+};
+
+export function createDbConnection(
+  connectionString: string,
+  options?: DbConnectionOptions,
+): DbConnection {
+  const client = postgres(connectionString, {
+    max: options?.singleConnection ? 1 : 10,
+    idle_timeout: options?.singleConnection ? 0 : 20,
+    connect_timeout: options?.singleConnection ? 60 : 30,
+  });
   return {
     db: drizzle(client, { schema }),
     close: () => client.end({ timeout: 10 }),
