@@ -1,0 +1,4 @@
+# Link this file in Railway: @steel-city/worker → Settings → Config-as-code (or set Build manually).
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "services/worker/Dockerfile"

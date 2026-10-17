@@ -12,13 +12,37 @@ if (existsSync(rootEnv)) {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const migrationsDir = join(__dirname, "..", "migrations");
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function connectWithRetry(url: string): Promise<ReturnType<typeof postgres>> {
+  const maxAttempts = 30;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const sql = postgres(url, { max: 1, connect_timeout: 15 });
+    try {
+      await sql`SELECT 1`;
+      console.log(`[migrate] database reachable (attempt ${attempt})`);
+      return sql;
+    } catch (err) {
+      await sql.end({ timeout: 1 }).catch(() => undefined);
+      console.warn(`[migrate] connect attempt ${attempt}/${maxAttempts} failed`, err);
+      if (attempt === maxAttempts) {
+        throw err;
+      }
+      await sleep(3000);
+    }
+  }
+  throw new Error("[migrate] unreachable");
+}
+
 async function migrate(): Promise<void> {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error("DATABASE_URL is not set");
   }
 
-  const sql = postgres(url, { max: 1 });
+  const sql = await connectWithRetry(url);
 
   await sql`
     CREATE TABLE IF NOT EXISTS schema_migrations (

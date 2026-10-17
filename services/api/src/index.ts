@@ -75,7 +75,8 @@ app.route(
 );
 
 const port = Number(process.env.PORT ?? 4000);
+const hostname = "0.0.0.0";
 
-console.log(`[api] listening on http://localhost:${port}`);
+console.log(`[api] listening on http://${hostname}:${port}`);
 
-serve({ fetch: app.fetch, port });
+serve({ fetch: app.fetch, port, hostname });
